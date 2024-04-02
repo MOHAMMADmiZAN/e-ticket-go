@@ -2,7 +2,11 @@ package api
 
 import (
 	"context"
-	"e-ticket/services/route-service/internal/database"
+	"e-ticket/services/route-service/internal/api/handler"
+	"e-ticket/services/route-service/internal/config"
+	"e-ticket/services/route-service/internal/repository"
+	"e-ticket/services/route-service/internal/service"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -15,11 +19,11 @@ import (
 // Server holds the dependencies for a HTTP server.
 type Server struct {
 	Router *gin.Engine
-	DB     *db.Database
+	DB     *config.Database
 }
 
 // NewServer creates a new HTTP server and sets up routing.
-func NewServer(databaseClient *db.Database) *Server {
+func NewServer(databaseClient *config.Database) *Server {
 	r := gin.New()
 	r.Use(gin.Recovery(), gin.Logger()) // Add Logger middleware
 
@@ -33,13 +37,24 @@ func NewServer(databaseClient *db.Database) *Server {
 
 // routes registers all the routes to the router.
 func (s *Server) routes() {
-	s.Router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "200"})
-	})
-	// Handle 404 Not Found
-	s.Router.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "Resource not found"})
-	})
+	// Create a new route handler and pass the route service.
+	rh := handler.NewRouteHandler(service.NewRouteService(repository.NewRouteRepository(s.DB.Conn)))
+
+	//Routes for the API
+	v1 := s.Router.Group("/api/v1")
+	{
+		routes := v1.Group("/routes")
+		{
+			routes.POST("/", rh.CreateRoute)
+			routes.GET("/", rh.GetAllRoutes)
+			routes.GET("/:id", rh.GetRouteByID)
+			routes.GET("health", func(c *gin.Context) {
+				c.JSON(http.StatusOK, gin.H{"status": "ok"})
+			})
+			//routes.PUT("/:id", rh.UpdateRoute)
+			//routes.DELETE("/:id", rh.DeleteRoute)
+		}
+	}
 }
 
 // Start runs the HTTP server on a specific address.
@@ -50,7 +65,7 @@ func (s *Server) Start(addr string) {
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("listen: %s\n", err)
 		}
 		log.Printf("Server started on %s\n", addr)

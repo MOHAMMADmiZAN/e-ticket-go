@@ -2,7 +2,8 @@ package main
 
 import (
 	"e-ticket/services/route-service/internal/api"
-	"e-ticket/services/route-service/internal/database"
+	"e-ticket/services/route-service/internal/config"
+	"e-ticket/services/route-service/internal/model"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -14,7 +15,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading environment variables from system")
 	}
-	database := db.NewDatabase()
+	database := config.NewDatabase(&model.Route{}, &model.Stop{}, &model.Schedule{})
 	defer database.Close()
 
 	// Get the port number from the environment variable.
