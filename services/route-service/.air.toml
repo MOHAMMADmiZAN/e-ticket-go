@@ -1,0 +1,51 @@
+# .air.toml
+# Air configuration file for live reloading Go applications
+
+# Root directory of your project, where the go.mod file is located
+root = "."
+
+# Directory where temporary files will be stored
+tmp_dir = "tmp"
+
+[build]
+# Command to build your application, output the binary to the tmp directory
+bin = "tmp/route-service"
+cmd = "go build -o ./tmp/route-service ./cmd"
+# Directory where the log file will be stored
+log = "build-errors.log"
+# Directories or glob patterns to include in the watch list
+include = [
+    "**/*.go",
+    "**/*.tpl",
+    "**/*.tmpl",
+    "**/*.html"
+]
+# Directories or glob patterns to exclude from the watch list
+exclude = [
+    "tmp",
+    "assets",
+    "vendor",
+    "testdata"
+]
+
+[color]
+# Colors for different components
+app = ""
+build = "yellow"
+main = "magenta"
+runner = "green"
+watcher = "cyan"
+
+[log]
+# Configure logging options
+main_only = false
+time = false
+
+[misc]
+# Miscellaneous options
+clean_on_exit = false
+
+[screen]
+# Screen options
+clear_on_rebuild = false
+keep_scroll = true
