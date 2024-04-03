@@ -9,3 +9,14 @@ type RouteCreateRequest struct {
 	StartLocation string    `json:"startLocation" binding:"required"`
 	EndLocation   string    `json:"endLocation" binding:"required"`
 }
+
+type RouteInfo struct {
+	RouteID         uint      `json:"route_id"`
+	Name            string    `json:"name"`
+	StartTime       time.Time `json:"start_time"`
+	DurationMinutes int       `json:"duration_minutes"`
+	StartLocation   string    `json:"start_location"`
+	EndLocation     string    `json:"end_location"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}

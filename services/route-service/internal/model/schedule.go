@@ -12,8 +12,8 @@ type Schedule struct {
 	StopID        uint      `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	ArrivalTime   time.Time `gorm:"not null"`
 	DepartureTime time.Time `gorm:"not null"`
-	Route         Route
-	Stop          Stop
+	Route         Route     `gorm:"foreignkey:RouteID"`
+	Stop          Stop      `gorm:"foreignkey:StopID"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`

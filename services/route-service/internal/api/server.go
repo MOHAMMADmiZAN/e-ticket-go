@@ -37,22 +37,28 @@ func NewServer(databaseClient *config.Database) *Server {
 
 // routes registers all the routes to the router.
 func (s *Server) routes() {
-	// Create a new route handler and pass the route service.
 	rh := handler.NewRouteHandler(service.NewRouteService(repository.NewRouteRepository(s.DB.Conn)))
+	sh := handler.NewStopHandler(service.NewStopService(repository.NewStopRepository(s.DB.Conn)))
 
-	//Routes for the API
 	v1 := s.Router.Group("/api/v1")
 	{
-		routes := v1.Group("/routes")
+		routesGroup := v1.Group("/routes")
+		//routesGroup.Use(AuthMiddleware()) // Hypothetical authentication middleware
 		{
-			routes.POST("/", rh.CreateRoute)
-			routes.GET("/", rh.GetAllRoutes)
-			routes.GET("/:id", rh.GetRouteByID)
-			routes.GET("health", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"status": "ok"})
-			})
-			//routes.PUT("/:id", rh.UpdateRoute)
-			//routes.DELETE("/:id", rh.DeleteRoute)
+			routesGroup.POST("/", rh.CreateRoute)
+			routesGroup.GET("/", rh.GetAllRoutes)
+			routesGroup.GET("/:id", rh.GetRouteByID)
+			//routesGroup.PUT("/:id",  rh.UpdateRoute)
+			routesGroup.DELETE("/:id", rh.DeleteRoute)
+
+			// Nested group for stops to emphasize dependency on routes
+			stopsGroup := routesGroup.Group("/:id/stops")
+			{
+				stopsGroup.GET("/", sh.ListStopsForRoute)
+				stopsGroup.POST("/", sh.AddStopToRoute)
+				stopsGroup.PUT("/:stopId", sh.UpdateStop)
+				stopsGroup.DELETE("/:stopId", sh.DeleteStop)
+			}
 		}
 	}
 }
@@ -68,7 +74,6 @@ func (s *Server) Start(addr string) {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("listen: %s\n", err)
 		}
-		log.Printf("Server started on %s\n", addr)
 	}()
 
 	// Wait for interrupt signal to gracefully shut down the server with a timeout.

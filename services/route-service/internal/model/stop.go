@@ -11,7 +11,7 @@ type Stop struct {
 	RouteID   uint   `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name      string `gorm:"not null;type:varchar(100)"`
 	Sequence  int    `gorm:"not null"`
-	Route     Route
+	Route     Route  `gorm:"foreignkey:RouteID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
