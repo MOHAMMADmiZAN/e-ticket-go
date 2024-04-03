@@ -39,11 +39,19 @@ func NewServer(databaseClient *config.Database) *Server {
 func (s *Server) routes() {
 	rh := handler.NewRouteHandler(service.NewRouteService(repository.NewRouteRepository(s.DB.Conn)))
 	sh := handler.NewStopHandler(service.NewStopService(repository.NewStopRepository(s.DB.Conn)))
+	sch := handler.NewScheduleHandler(service.NewScheduleService(repository.NewScheduleRepository(s.DB.Conn), 5*time.Minute))
 
 	v1 := s.Router.Group("/api/v1")
 	{
 		routesGroup := v1.Group("/routes")
 		//routesGroup.Use(AuthMiddleware()) // Hypothetical authentication middleware
+		//create a helth route
+		v1.GET("/health", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "OK",
+			})
+		})
+
 		{
 			routesGroup.POST("/", rh.CreateRoute)
 			routesGroup.GET("/", rh.GetAllRoutes)
@@ -51,7 +59,7 @@ func (s *Server) routes() {
 			//routesGroup.PUT("/:id",  rh.UpdateRoute)
 			routesGroup.DELETE("/:id", rh.DeleteRoute)
 
-			// Nested group for stops to emphasize dependency on routes
+			// Stop routes
 			stopsGroup := routesGroup.Group("/:id/stops")
 			{
 				stopsGroup.GET("/", sh.ListStopsForRoute)
@@ -59,6 +67,16 @@ func (s *Server) routes() {
 				stopsGroup.PUT("/:stopId", sh.UpdateStop)
 				stopsGroup.DELETE("/:stopId", sh.DeleteStop)
 			}
+			// Schedule routes
+			schedulesGroup := routesGroup.Group("/:id/schedules")
+			{
+				schedulesGroup.POST("/", sch.CreateSchedule)
+				schedulesGroup.GET("/", sch.GetSchedulesByRouteID)
+				schedulesGroup.GET("/:scheduleID", sch.GetScheduleByID)
+				schedulesGroup.PUT("/:scheduleID", sch.UpdateSchedule)
+				schedulesGroup.DELETE("/:scheduleID", sch.DeleteSchedule)
+			}
+
 		}
 	}
 }
