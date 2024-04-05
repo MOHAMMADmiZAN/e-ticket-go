@@ -82,10 +82,6 @@ func (s *StopService) UpdateStop(ctx context.Context, routeID uint, stopID uint,
 	if err != nil {
 		return nil, ErrStopNotFound
 	}
-	if existingStop.Route.RouteID != routeID {
-		return nil, ErrInvalidRouteID
-	}
-
 	// Ensure the sequence is available
 	if existingStop.Sequence != updatedStop.Sequence {
 		result, _ := s.stopRepo.GetStopBySequenceAndRouteID(ctx, updatedStop.Sequence, routeID)

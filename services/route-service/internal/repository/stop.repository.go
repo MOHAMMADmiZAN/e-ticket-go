@@ -52,7 +52,6 @@ func (repo *StopRepository) AddStopToRoute(ctx context.Context, stop model.Stop)
 func (repo *StopRepository) ListAllStopsForRoute(ctx context.Context, routeID uint) ([]dto.StopResponse, error) {
 	var stops []model.Stop
 	if err := repo.db.WithContext(ctx).
-		Preload("Route").
 		Where("route_id = ?", routeID).
 		Order("sequence asc").
 		Find(&stops).Error; err != nil {
@@ -89,7 +88,7 @@ func (repo *StopRepository) DeleteStop(ctx context.Context, routeID uint, stopID
 
 func (repo *StopRepository) FindStopByID(ctx context.Context, stopID uint) (*dto.StopResponse, error) {
 	var stop model.Stop
-	if err := repo.db.WithContext(ctx).Preload("Route").First(&stop, stopID).Error; err != nil {
+	if err := repo.db.WithContext(ctx).First(&stop, stopID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrStopNotFound
 		}
@@ -150,22 +149,7 @@ func mapStopToResponse(stop model.Stop) dto.StopResponse {
 		StopID:    stop.ID,
 		Name:      stop.Name,
 		Sequence:  stop.Sequence,
-		Route:     mapRouteToInfo(stop.Route),
 		CreatedAt: stop.CreatedAt,
 		UpdatedAt: stop.UpdatedAt,
-	}
-}
-
-// mapRouteToInfo maps a model.Route to a dto.RouteInfo.
-func mapRouteToInfo(route model.Route) dto.RouteInfo {
-	return dto.RouteInfo{
-		RouteID:         route.ID,
-		Name:            route.Name,
-		StartTime:       route.StartTime,
-		DurationMinutes: route.Duration,
-		StartLocation:   route.StartLocation,
-		EndLocation:     route.EndLocation,
-		CreatedAt:       route.CreatedAt,
-		UpdatedAt:       route.UpdatedAt,
 	}
 }

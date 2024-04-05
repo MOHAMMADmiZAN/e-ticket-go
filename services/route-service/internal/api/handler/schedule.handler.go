@@ -22,6 +22,13 @@ func NewScheduleHandler(scheduleService service.ScheduleService) *ScheduleHandle
 
 // CreateSchedule handles POST requests to create a new schedule.
 func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
+	// Parse the route ID from the URL parameter
+	routeIDParam := c.Param("id")
+	routeID, err := strconv.ParseUint(routeIDParam, 10, 32) // Convert string to uint
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Route ID in URL"})
+		return
+	}
 	var req dto.AddScheduleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -30,6 +37,10 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 
 	if err := req.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if uint(routeID) != req.RouteID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Route ID in URL does not match Route ID in request body"})
 		return
 	}
 

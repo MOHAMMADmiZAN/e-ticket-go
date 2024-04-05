@@ -37,47 +37,79 @@ func NewServer(databaseClient *config.Database) *Server {
 
 // routes registers all the routes to the router.
 func (s *Server) routes() {
+	// Define handlers
 	rh := handler.NewRouteHandler(service.NewRouteService(repository.NewRouteRepository(s.DB.Conn)))
 	sh := handler.NewStopHandler(service.NewStopService(repository.NewStopRepository(s.DB.Conn)))
 	sch := handler.NewScheduleHandler(service.NewScheduleService(repository.NewScheduleRepository(s.DB.Conn), 5*time.Minute))
 
+	// API Versioning
 	v1 := s.Router.Group("/api/v1")
-	{
-		routesGroup := v1.Group("/routes")
-		//routesGroup.Use(AuthMiddleware()) // Hypothetical authentication middleware
-		//create a helth route
-		v1.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"status": "OK",
-			})
+
+	// Health check route
+	s.setupHealthCheckRoute()
+
+	// Setup route groups
+	s.setupRouteHandlers(v1, rh, sh, sch)
+
+	// Catch-all route for handling unmatched routes (404 Not Found)
+	s.setupNoRouteHandler()
+}
+
+func (s *Server) setupHealthCheckRoute() {
+	s.Router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "OK"})
+	})
+}
+
+func (s *Server) setupNoRouteHandler() {
+	s.Router.NoRoute(func(c *gin.Context) {
+		// Improved error message
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": gin.H{
+				"code":    http.StatusNotFound,
+				"type":    "PAGE_NOT_FOUND",
+				"message": "The requested resource was not found on this server.",
+			},
+			"details": "Check the URL for errors or contact support if the problem persists.",
 		})
+	})
+}
 
-		{
-			routesGroup.POST("/", rh.CreateRoute)
-			routesGroup.GET("/", rh.GetAllRoutes)
-			routesGroup.GET("/:id", rh.GetRouteByID)
-			//routesGroup.PUT("/:id",  rh.UpdateRoute)
-			routesGroup.DELETE("/:id", rh.DeleteRoute)
+func (s *Server) setupRouteHandlers(v1 *gin.RouterGroup, rh *handler.RouteHandler, sh handler.StopHandlerInterface, sch *handler.ScheduleHandler) {
+	routesGroup := v1.Group("/routes")
+	// Route handlers
+	{
+		routesGroup.POST("/", rh.CreateRoute)
+		routesGroup.GET("/", rh.GetAllRoutes)
+		routesGroup.GET("/:id", rh.GetRouteByID)
+		routesGroup.DELETE("/:id", rh.DeleteRoute)
+	}
 
-			// Stop routes
-			stopsGroup := routesGroup.Group("/:id/stops")
-			{
-				stopsGroup.GET("/", sh.ListStopsForRoute)
-				stopsGroup.POST("/", sh.AddStopToRoute)
-				stopsGroup.PUT("/:stopId", sh.UpdateStop)
-				stopsGroup.DELETE("/:stopId", sh.DeleteStop)
-			}
-			// Schedule routes
-			schedulesGroup := routesGroup.Group("/:id/schedules")
-			{
-				schedulesGroup.POST("/", sch.CreateSchedule)
-				schedulesGroup.GET("/", sch.GetSchedulesByRouteID)
-				schedulesGroup.GET("/:scheduleID", sch.GetScheduleByID)
-				schedulesGroup.PUT("/:scheduleID", sch.UpdateSchedule)
-				schedulesGroup.DELETE("/:scheduleID", sch.DeleteSchedule)
-			}
+	// Stop handlers
+	s.setupStopHandlers(routesGroup, sh)
 
-		}
+	// Schedule handlers
+	s.setupScheduleHandlers(routesGroup, sch)
+}
+
+func (s *Server) setupStopHandlers(routesGroup *gin.RouterGroup, sh handler.StopHandlerInterface) {
+	stopsGroup := routesGroup.Group("/:id/stops")
+	{
+		stopsGroup.GET("/", sh.ListStopsForRoute)
+		stopsGroup.POST("/", sh.AddStopToRoute)
+		stopsGroup.PUT("/:stopId", sh.UpdateStop)
+		stopsGroup.DELETE("/:stopId", sh.DeleteStop)
+	}
+}
+
+func (s *Server) setupScheduleHandlers(routesGroup *gin.RouterGroup, sch *handler.ScheduleHandler) {
+	schedulesGroup := routesGroup.Group("/:id/schedules")
+	{
+		schedulesGroup.POST("/", sch.CreateSchedule)
+		schedulesGroup.GET("/", sch.GetSchedulesByRouteID)
+		schedulesGroup.GET("/:scheduleID", sch.GetScheduleByID)
+		schedulesGroup.PUT("/:scheduleID", sch.UpdateSchedule)
+		schedulesGroup.DELETE("/:scheduleID", sch.DeleteSchedule)
 	}
 }
 

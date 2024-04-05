@@ -20,3 +20,15 @@ type RouteInfo struct {
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
+
+type RouteResponse struct {
+	ID            uint           `json:"id"`
+	Name          string         `json:"name"`
+	StartTime     time.Time      `json:"startTime"`
+	Duration      int            `json:"duration"`
+	StartLocation string         `json:"startLocation"`
+	EndLocation   string         `json:"endLocation"`
+	Stops         []StopResponse `json:"stops"` // Nested Stops within RouteResponse
+	CreatedAt     time.Time      `json:"createdAt"`
+	UpdatedAt     time.Time      `json:"updatedAt"`
+}

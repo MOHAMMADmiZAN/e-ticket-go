@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"strings"
@@ -23,7 +24,12 @@ func NewDatabase(models ...interface{}) *Database {
 		createDatabase(dsn)
 	}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// Initialize the GORM logger
+	gormLogger := initializeLogger()
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: gormLogger,
+	})
 	if err != nil {
 		log.Fatalf("Could not connect to the database: %v", err)
 	}
@@ -108,4 +114,34 @@ func (database *Database) Close() {
 	if err := sqlDB.Close(); err != nil {
 		log.Fatalf("Error closing database: %v", err)
 	}
+}
+
+func initializeLogger() logger.Interface {
+	// Fetch log level from environment
+	logLevelEnv := os.Getenv("GORM_LOG_LEVEL")
+	var logLevel logger.LogLevel
+	switch logLevelEnv {
+	case "SILENT":
+		logLevel = logger.Silent
+	case "ERROR":
+		logLevel = logger.Error
+	case "WARN":
+		logLevel = logger.Warn
+	case "INFO":
+		logLevel = logger.Info
+	default:
+		logLevel = logger.Warn // Default to Warn if not specified
+	}
+
+	// Setup the GORM logger
+	gormLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // Or use a more sophisticated logger
+		logger.Config{
+			SlowThreshold: time.Second, // Adjust based on your requirements
+			LogLevel:      logLevel,
+			Colorful:      true, // Set to false for production environments
+		},
+	)
+
+	return gormLogger
 }

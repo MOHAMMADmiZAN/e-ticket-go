@@ -7,13 +7,11 @@ import (
 )
 
 type ScheduleResponse struct {
-	ScheduleID    uint         `json:"schedule_id"`
-	RouteInfo     RouteInfo    `json:"route"`
-	StopResponse  StopResponse `json:"stop"`
-	ArrivalTime   time.Time    `json:"arrival_time"`
-	DepartureTime time.Time    `json:"departure_time"`
-	CreatedAt     time.Time    `json:"created_at"`
-	UpdatedAt     time.Time    `json:"updated_at"`
+	ScheduleID    uint      `json:"schedule_id"`
+	ArrivalTime   time.Time `json:"arrival_time"`
+	DepartureTime time.Time `json:"departure_time"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type AddScheduleRequest struct {

@@ -32,7 +32,7 @@ func (r *scheduleRepository) CreateSchedule(ctx context.Context, schedule *model
 
 func (r *scheduleRepository) GetScheduleByID(ctx context.Context, scheduleID uint) (*dto.ScheduleResponse, error) {
 	var schedule model.Schedule
-	if result := r.db.WithContext(ctx).Preload("Stop").Preload("Route").First(&schedule, scheduleID); result.Error != nil {
+	if result := r.db.WithContext(ctx).Preload("Stop").First(&schedule, scheduleID); result.Error != nil {
 		return nil, result.Error
 	}
 	return r.toScheduleResponse(&schedule), nil
@@ -40,7 +40,7 @@ func (r *scheduleRepository) GetScheduleByID(ctx context.Context, scheduleID uin
 
 func (r *scheduleRepository) GetSchedulesByRouteID(ctx context.Context, routeID uint) ([]dto.ScheduleResponse, error) {
 	var schedules []model.Schedule
-	if result := r.db.WithContext(ctx).Where("route_id = ?", routeID).Preload("Stop").Preload("Route").Find(&schedules); result.Error != nil {
+	if result := r.db.WithContext(ctx).Where("route_id = ?", routeID).Find(&schedules); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -79,8 +79,6 @@ func (r *scheduleRepository) toScheduleResponse(schedule *model.Schedule) *dto.S
 	}
 	return &dto.ScheduleResponse{
 		ScheduleID:    schedule.ID,
-		RouteInfo:     r.toRouteInfoDTO(&schedule.Route),
-		StopResponse:  r.toStopResponseDTO(&schedule.Stop),
 		ArrivalTime:   schedule.ArrivalTime,
 		DepartureTime: schedule.DepartureTime,
 		CreatedAt:     schedule.CreatedAt,
@@ -104,7 +102,6 @@ func (r *scheduleRepository) toStopResponseDTO(stop *model.Stop) dto.StopRespons
 		StopID:    stop.ID,
 		Name:      stop.Name,
 		Sequence:  stop.Sequence,
-		Route:     r.toRouteInfoDTO(&stop.Route),
 		CreatedAt: stop.CreatedAt,
 		UpdatedAt: stop.UpdatedAt,
 	}
