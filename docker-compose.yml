@@ -34,26 +34,26 @@ services:
       - backend-network
     restart: on-failure
 
-  route-service:
-    build:
-      context: ./services/route-service
-      dockerfile: deployments/Dockerfile
-      args:
-        - ENV=${ENV}  # Takes the environment variable from the .env file or shell environment
-    ports:
-      - "8080:8080"  # Expose the port for the route-service to the host
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
-    env_file:
-      - ./services/route-service/.env  # Use an environment file for configuration
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - backend-network
-    restart: on-failure
-    volumes:
-      - ./services/route-service:/app  # Mount the volume for development with hot reload
+#  route-service:
+#    build:
+#      context: ./services/route-service
+#      dockerfile: deployments/Dockerfile
+#      args:
+#        - ENV=${ENV}  # Takes the environment variable from the .env file or shell environment
+#    ports:
+#      - "8080:8080"  # Expose the port for the route-service to the host
+#    environment:
+#      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+#    env_file:
+#      - ./services/route-service/.env  # Use an environment file for configuration
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#    networks:
+#      - backend-network
+#    restart: on-failure
+#    volumes:
+#      - ./services/route-service:/app  # Mount the volume for development with hot reload
 
 networks:
   backend-network:

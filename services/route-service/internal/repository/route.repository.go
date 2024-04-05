@@ -26,14 +26,29 @@ func (r *RouteRepository) Create(ctx context.Context, route *model.Route) error 
 // GetAll fetches all route records from the database.
 func (r *RouteRepository) GetAll(ctx context.Context) ([]model.Route, error) {
 	var routes []model.Route
-	err := r.db.WithContext(ctx).Find(&routes).Error
+	err := r.db.WithContext(ctx).
+		Preload("Stops", func(db *gorm.DB) *gorm.DB {
+			return db.Order("stops.sequence ASC") // Order stops by sequence
+		}).
+		Preload("Schedules", func(db *gorm.DB) *gorm.DB {
+			return db.Order("schedules.departure_time ASC") // Order schedules by departure time
+		}).
+		Find(&routes).Error
 	return routes, err
 }
 
 // GetByID fetches a single route record by its ID from the database.
 func (r *RouteRepository) GetByID(ctx context.Context, id uint) (*model.Route, error) {
 	var route model.Route
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&route).Error
+	err := r.db.WithContext(ctx).
+		Preload("Stops", func(db *gorm.DB) *gorm.DB {
+			return db.Order("stops.sequence ASC") // Order stops by sequence
+		}).
+		Preload("Schedules", func(db *gorm.DB) *gorm.DB {
+			return db.Order("schedules.departure_time ASC") // Order schedules by departure time
+		}).
+		Where("id = ?", id).
+		First(&route).Error
 	if err != nil {
 		return nil, err
 	}
