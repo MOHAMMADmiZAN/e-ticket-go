@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"log"
 	"time"
 )
 
@@ -18,4 +19,24 @@ type Route struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt ` gorm:"index"`
+}
+
+func (r *Route) AfterDelete(tx *gorm.DB) error {
+	// Delete related Stops
+	if err := tx.Where("route_id = ?", r.ID).Delete(&Stop{}).Error; err != nil {
+		return err
+	}
+
+	// Delete related Schedules
+	if err := tx.Where("route_id = ?", r.ID).Delete(&Schedule{}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+func (r *Route) AfterFind(tx *gorm.DB) (err error) {
+	// Custom logic to execute after a route is found
+	log.Printf("Route with ID %d has been found", r.ID)
+	// You can perform additional operations or transformations here
+	return nil
 }

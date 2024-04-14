@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"e-ticket/services/route-service/internal/api/dto"
-	"e-ticket/services/route-service/internal/model"
-	"e-ticket/services/route-service/internal/repository"
 	"errors"
 	"fmt"
+	"route-service/internal/api/dto"
+	"route-service/internal/model"
+	"route-service/internal/repository"
 )
 
 // Define business-specific error types.

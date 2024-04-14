@@ -1,12 +1,12 @@
 package main
 
 import (
-	"e-ticket/services/route-service/internal/api"
-	"e-ticket/services/route-service/internal/config"
-	"e-ticket/services/route-service/internal/model"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"route-service/internal/api"
+	"route-service/internal/config"
+	"route-service/internal/model"
 	"strconv"
 )
 

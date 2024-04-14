@@ -8,9 +8,10 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
+poll = true
 # Command to build your application, output the binary to the tmp directory
 bin = "tmp/route-service"
-cmd = "go build -o ./tmp/route-service ./cmd"
+cmd = "go build -o ./tmp/route-service"
 # Directory where the log file will be stored
 log = "build-errors.log"
 # Directories or glob patterns to include in the watch list

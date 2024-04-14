@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"e-ticket/services/route-service/internal/api/dto"
-	"e-ticket/services/route-service/internal/model"
-	"e-ticket/services/route-service/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"route-service/internal/api/dto"
+	"route-service/internal/model"
+	"route-service/internal/service"
 	"strconv"
 )
 
