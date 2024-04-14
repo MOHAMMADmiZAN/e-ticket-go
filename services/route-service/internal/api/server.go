@@ -2,16 +2,19 @@ package api
 
 import (
 	"context"
-	"e-ticket/services/route-service/internal/api/handler"
-	"e-ticket/services/route-service/internal/config"
-	"e-ticket/services/route-service/internal/repository"
-	"e-ticket/services/route-service/internal/service"
 	"errors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	_ "route-service/docs" // Required for Swagger docs
+	"route-service/internal/api/handler"
+	"route-service/internal/config"
+	"route-service/internal/repository"
+	"route-service/internal/service"
 	"syscall"
 	"time"
 )
@@ -26,6 +29,8 @@ type Server struct {
 func NewServer(databaseClient *config.Database) *Server {
 	r := gin.New()
 	r.Use(gin.Recovery(), gin.Logger()) // Add Logger middleware
+	// Swagger documentation
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
 
 	s := &Server{
 		Router: r,
@@ -57,7 +62,7 @@ func (s *Server) routes() {
 
 func (s *Server) setupHealthCheckRoute() {
 	s.Router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "OK"})
+		c.JSON(http.StatusOK, gin.H{"status": "healthy", "message": "Route service is running"})
 	})
 }
 
@@ -82,6 +87,7 @@ func (s *Server) setupRouteHandlers(v1 *gin.RouterGroup, rh *handler.RouteHandle
 		routesGroup.POST("/", rh.CreateRoute)
 		routesGroup.GET("/", rh.GetAllRoutes)
 		routesGroup.GET("/:id", rh.GetRouteByID)
+		routesGroup.PUT("/:id", rh.UpdateRoute)
 		routesGroup.DELETE("/:id", rh.DeleteRoute)
 	}
 
@@ -125,6 +131,7 @@ func (s *Server) Start(addr string) {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
+	log.Println("Server started successfully on", addr)
 
 	// Wait for interrupt signal to gracefully shut down the server with a timeout.
 	quit := make(chan os.Signal, 1)

@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
-	"e-ticket/services/route-service/internal/model"
+	"fmt"
 	"gorm.io/gorm"
+	"log"
+	"route-service/internal/model"
 )
 
 // RouteRepository is responsible for handling the operations related to the Route model.
@@ -57,10 +59,29 @@ func (r *RouteRepository) GetByID(ctx context.Context, id uint) (*model.Route, e
 
 // Update updates an existing route record in the database.
 func (r *RouteRepository) Update(ctx context.Context, route *model.Route) error {
-	return r.db.WithContext(ctx).Save(route).Error
+	if err := r.db.WithContext(ctx).Model(&model.Route{}).Where("id = ?", route.ID).Updates(route).Error; err != nil {
+		// Logging the error with context (like request ID if available) would be beneficial for debugging
+		log.Printf("Failed to update route with ID %d: %v", route.ID, err)
+		return fmt.Errorf("update failed: %w", err)
+	}
+	return nil
 }
 
-// Delete removes a route record from the database.
 func (r *RouteRepository) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&model.Route{}, id).Error
+	// Start a new transaction
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Retrieve and delete the route using the primary key, `id`.
+		if err := tx.WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&model.Route{}).Error; err != nil {
+			// Returning any error will rollback the transaction
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("Failed to delete route with ID %d: %v", id, err)
+		return err
+	}
+
+	return nil
 }

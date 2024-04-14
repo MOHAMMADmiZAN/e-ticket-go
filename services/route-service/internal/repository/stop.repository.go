@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-	"e-ticket/services/route-service/internal/api/dto"
-	"e-ticket/services/route-service/internal/model"
 	"errors"
 	"gorm.io/gorm"
+	"route-service/internal/api/dto"
+	"route-service/internal/model"
 )
 
 var (

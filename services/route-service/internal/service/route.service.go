@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"e-ticket/services/route-service/internal/api/dto"
-	"e-ticket/services/route-service/internal/model"
-	"e-ticket/services/route-service/internal/repository"
+	"fmt"
+	"route-service/internal/api/dto"
+	"route-service/internal/model"
+	"route-service/internal/repository"
 )
 
 // RouteService provides methods to work with the routes repository.
@@ -20,17 +21,10 @@ func NewRouteService(repo *repository.RouteRepository) *RouteService {
 }
 
 // CreateRoute handles the creation of a new route.
-func (s *RouteService) CreateRoute(ctx context.Context, request dto.RouteCreateRequest) (*model.Route, error) {
-
-	route := &model.Route{
-		Name:          request.Name,
-		StartTime:     request.StartTime,
-		Duration:      request.Duration,
-		StartLocation: request.StartLocation,
-		EndLocation:   request.EndLocation,
-	}
-
+func (s *RouteService) CreateRoute(ctx context.Context, route *model.Route) (*model.Route, error) {
 	err := s.repo.Create(ctx, route)
+	// Return  Route Response
+
 	return route, err
 }
 
@@ -69,18 +63,15 @@ func (s *RouteService) GetRouteByID(ctx context.Context, id uint) (*dto.RouteRes
 	return MapRouteModelToRouteResponse(route), nil
 }
 
-// UpdateRoute updates an existing route's details.
-//func (s *RouteService) UpdateRoute(ctx context.Context, id uint, name string, startTime time.Time, duration int, startLocation, endLocation string) (*model.Route, error) {
-//	route := &model.Route{
-//		Name:          name,
-//		StartTime:     startTime,
-//		Duration:      duration,
-//		StartLocation: startLocation,
-//		EndLocation:   endLocation,
-//	}
-//	err := s.repo.Update(ctx, id, route)
-//	return route, err
-//}
+// UpdateRoute updates an existing route's details based on the provided request.
+func (s *RouteService) UpdateRoute(ctx context.Context, route *model.Route) (*model.Route, error) {
+
+	if err := s.repo.Update(ctx, route); err != nil {
+		return nil, fmt.Errorf("error updating route: %v", err)
+	}
+
+	return route, nil
+}
 
 // DeleteRoute deletes a route by its ID.
 func (s *RouteService) DeleteRoute(ctx context.Context, id uint) error {

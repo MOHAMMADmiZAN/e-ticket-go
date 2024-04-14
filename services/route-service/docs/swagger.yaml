@@ -1,0 +1,206 @@
+definitions:
+  dto.RouteCreateRequest:
+    properties:
+      duration:
+        description: Ensure duration is greater than 0
+        type: integer
+      endLocation:
+        type: string
+      name:
+        type: string
+      startLocation:
+        type: string
+      startTime:
+        type: string
+    required:
+    - duration
+    - endLocation
+    - name
+    - startLocation
+    - startTime
+    type: object
+  dto.RouteInfo:
+    properties:
+      created_at:
+        type: string
+      duration_minutes:
+        type: integer
+      end_location:
+        type: string
+      name:
+        type: string
+      route_id:
+        type: integer
+      start_location:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.RouteUpdateRequest:
+    properties:
+      duration:
+        type: integer
+      endLocation:
+        type: string
+      name:
+        type: string
+      startLocation:
+        type: string
+      startTime:
+        type: string
+    type: object
+  util.ErrorMessage:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/routes:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all routes available in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all routes
+          schema:
+            items:
+              $ref: '#/definitions/dto.RouteInfo'
+            type: array
+        "500":
+          description: Unable to retrieve routes
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+      summary: Retrieve all routes
+      tags:
+      - routes
+    post:
+      consumes:
+      - application/json
+      description: Create a new route with the specified details.
+      parameters:
+      - description: Create Route Request
+        in: body
+        name: route
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RouteCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created route information
+          schema:
+            $ref: '#/definitions/dto.RouteInfo'
+        "404":
+          description: Route not found
+          schema:
+            type: string
+        "500":
+          description: Unable to create route
+          schema:
+            type: string
+      summary: Add a new route
+      tags:
+      - routes
+  /api/v1/routes/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a route by its unique ID
+      parameters:
+      - description: Route ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Route successfully deleted
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+        "500":
+          description: Unable to delete route
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+      summary: Delete a route
+      tags:
+      - routes
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a route by its unique ID
+      parameters:
+      - description: Route ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved route
+          schema:
+            $ref: '#/definitions/dto.RouteInfo'
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+        "500":
+          description: Unable to retrieve route
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+      summary: Get route by ID
+      tags:
+      - routes
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing route by its ID.
+      parameters:
+      - description: Route ID
+        format: uint
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Route Update Information
+        in: body
+        name: route
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RouteUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated route information
+          schema:
+            $ref: '#/definitions/dto.RouteInfo'
+        "400":
+          description: Invalid route ID or request format
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+        "500":
+          description: Internal Server Error - Unable to update route
+          schema:
+            $ref: '#/definitions/util.ErrorMessage'
+      summary: Update a route
+      tags:
+      - routes
+swagger: "2.0"

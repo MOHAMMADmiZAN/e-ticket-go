@@ -25,10 +25,10 @@ func NewDatabase(models ...interface{}) *Database {
 	}
 
 	// Initialize the GORM logger
-	gormLogger := initializeLogger()
+	//gormLogger := initializeLogger()
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gormLogger,
+		//Logger: gormLogger,
 	})
 	if err != nil {
 		log.Fatalf("Could not connect to the database: %v", err)

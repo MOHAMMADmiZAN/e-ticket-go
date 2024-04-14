@@ -39,3 +39,14 @@ func FormatValidationError(err error, dtoType interface{}) []ValidationError {
 	}
 	return errors
 }
+
+type ErrorMessage struct {
+	Message string `json:"message"`
+}
+
+// NewErrorResponse write a utils function which  take a message and code and return a ErrorResponse struct
+func NewErrorResponse(message string) ErrorMessage {
+	return ErrorMessage{
+		Message: message,
+	}
+}

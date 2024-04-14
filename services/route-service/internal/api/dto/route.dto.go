@@ -1,6 +1,9 @@
 package dto
 
-import "time"
+import (
+	"route-service/internal/model"
+	"time"
+)
 
 type RouteCreateRequest struct {
 	Name          string    `json:"name" binding:"required"`
@@ -31,4 +34,68 @@ type RouteResponse struct {
 	Stops         []StopResponse `json:"stops"` // Nested Stops within RouteResponse
 	CreatedAt     time.Time      `json:"createdAt"`
 	UpdatedAt     time.Time      `json:"updatedAt"`
+}
+
+// RouteUpdateRequest represents the request to update a route.
+type RouteUpdateRequest struct {
+	Name          *string    `json:"name,omitempty"`
+	StartTime     *time.Time `json:"startTime,omitempty"`
+	Duration      *int       `json:"duration,omitempty"`
+	StartLocation *string    `json:"startLocation,omitempty"`
+	EndLocation   *string    `json:"endLocation,omitempty"`
+}
+
+// ToModel write a function to covert dto to model
+func (r *RouteCreateRequest) ToModel() *model.Route {
+	return &model.Route{
+		Name:          r.Name,
+		StartTime:     r.StartTime,
+		Duration:      r.Duration,
+		StartLocation: r.StartLocation,
+		EndLocation:   r.EndLocation,
+	}
+}
+
+func (r *RouteUpdateRequest) ToModel(existingRouteResponse *RouteResponse) *model.Route {
+	// Initialize a Route model with the values from the existing RouteResponse.
+	updatedModel := &model.Route{
+		Name:          existingRouteResponse.Name,
+		StartTime:     existingRouteResponse.StartTime,
+		Duration:      existingRouteResponse.Duration,
+		StartLocation: existingRouteResponse.StartLocation,
+		EndLocation:   existingRouteResponse.EndLocation,
+		ID:            existingRouteResponse.ID,
+	}
+
+	// Overwrite the model fields with the values from the RouteUpdateRequest if provided.
+	if r.Name != nil {
+		updatedModel.Name = *r.Name
+	}
+	if r.StartTime != nil {
+		updatedModel.StartTime = *r.StartTime
+	}
+	if r.Duration != nil {
+		updatedModel.Duration = *r.Duration
+	}
+	if r.StartLocation != nil {
+		updatedModel.StartLocation = *r.StartLocation
+	}
+	if r.EndLocation != nil {
+		updatedModel.EndLocation = *r.EndLocation
+	}
+
+	return updatedModel
+}
+
+func RouteModelToRouteInfo(route *model.Route) RouteInfo {
+	return RouteInfo{
+		RouteID:         route.ID,
+		Name:            route.Name,
+		StartTime:       route.StartTime,
+		DurationMinutes: route.Duration,
+		StartLocation:   route.StartLocation,
+		EndLocation:     route.EndLocation,
+		CreatedAt:       route.CreatedAt,
+		UpdatedAt:       route.UpdatedAt,
+	}
 }

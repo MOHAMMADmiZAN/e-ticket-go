@@ -19,7 +19,7 @@ COPY . .
 
 # Build the application for production use
 # Adjustments for Air not needed here since Air is used in development
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o route-service ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o route-service .
 
 # Copy the entrypoint script into the image and make it executable
 COPY entrypoint.sh /entrypoint.sh

@@ -1,8 +1,8 @@
 package dto
 
 import (
-	"e-ticket/services/route-service/internal/model"
 	"errors"
+	"route-service/internal/model"
 	"time"
 )
 
