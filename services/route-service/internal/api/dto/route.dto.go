@@ -7,8 +7,8 @@ import (
 
 type RouteCreateRequest struct {
 	Name          string    `json:"name" binding:"required"`
-	StartTime     time.Time `json:"startTime" binding:"required"`
-	Duration      int       `json:"duration" binding:"required,gt=0"` // Ensure duration is greater than 0
+	StartTime     time.Time `json:"startTime" binding:"required AfterNow"`
+	Duration      int       `json:"duration" binding:"required,gt=0 "` // Ensure duration is greater than 0
 	StartLocation string    `json:"startLocation" binding:"required"`
 	EndLocation   string    `json:"endLocation" binding:"required"`
 }
@@ -32,8 +32,8 @@ type RouteResponse struct {
 	StartLocation string         `json:"startLocation"`
 	EndLocation   string         `json:"endLocation"`
 	Stops         []StopResponse `json:"stops"` // Nested Stops within RouteResponse
-	CreatedAt     time.Time      `json:"createdAt"`
-	UpdatedAt     time.Time      `json:"updatedAt"`
+	CreatedAt     string         `json:"createdAt"`
+	UpdatedAt     string         `json:"updatedAt"`
 }
 
 // RouteUpdateRequest represents the request to update a route.

@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	_ "route-service/docs" // Required for Swagger docs
 	"route-service/internal/api/handler"
+	"route-service/internal/api/middleware"
 	"route-service/internal/config"
 	"route-service/internal/repository"
 	"route-service/internal/service"
@@ -28,7 +29,7 @@ type Server struct {
 // NewServer creates a new HTTP server and sets up routing.
 func NewServer(databaseClient *config.Database) *Server {
 	r := gin.New()
-	r.Use(gin.Recovery(), gin.Logger()) // Add Logger middleware
+	r.Use(gin.Recovery(), gin.Logger(), middleware.ErrorHandlingMiddleware()) // Add Logger middleware
 	// Swagger documentation
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
 
@@ -62,7 +63,7 @@ func (s *Server) routes() {
 
 func (s *Server) setupHealthCheckRoute() {
 	s.Router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "healthy", "message": "Route service is running"})
+		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "Route service is running"})
 	})
 }
 

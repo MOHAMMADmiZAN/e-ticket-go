@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Persist the data in a volume for the database container to keep the data between container restarts and rebuilds
     networks:
       - backend-network
     restart: on-failure

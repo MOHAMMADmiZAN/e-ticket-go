@@ -6,9 +6,10 @@ import (
 	"route-service/internal/api/dto"
 	"route-service/internal/model"
 	"route-service/internal/repository"
+	"route-service/pkg"
 )
 
-// RouteService provides methods to work with the routes repository.
+// RouteService provides methods to work with the routes' repository.
 type RouteService struct {
 	repo *repository.RouteRepository
 }
@@ -116,8 +117,8 @@ func MapRouteModelToRouteResponse(route *model.Route) *dto.RouteResponse {
 		StartLocation: route.StartLocation,
 		EndLocation:   route.EndLocation,
 		Stops:         stopsResponse,
-		CreatedAt:     route.CreatedAt,
-		UpdatedAt:     route.UpdatedAt,
+		CreatedAt:     pkg.ConvertTime(route.CreatedAt),
+		UpdatedAt:     pkg.ConvertTime(route.UpdatedAt),
 	}
 }
 
