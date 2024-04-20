@@ -5,7 +5,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"route-service/internal/api/dto"
-	"route-service/internal/model"
+	"route-service/internal/models"
 )
 
 var (
@@ -15,14 +15,15 @@ var (
 
 // StopRepositoryInterface defines the methods that our StopRepository must implement.
 type StopRepositoryInterface interface {
-	AddStopToRoute(ctx context.Context, stop model.Stop) (*dto.StopResponse, error)
+	AddStopToRoute(ctx context.Context, stop models.Stop) (*dto.StopResponse, error)
 	ListAllStopsForRoute(ctx context.Context, routeID uint) ([]dto.StopResponse, error)
-	UpdateStopDetails(ctx context.Context, stop model.Stop) (*dto.StopResponse, error)
+	UpdateStopDetails(ctx context.Context, stop models.Stop) (*dto.StopResponse, error)
 	DeleteStop(ctx context.Context, routeID uint, stopID uint) error
 	FindStopByID(ctx context.Context, stopID uint) (*dto.StopResponse, error)
 	ReSequenceStops(ctx context.Context, routeID uint, deletedStopSequence int) error
 	DeleteAndReSequenceStops(ctx context.Context, routeID uint, stopID uint) error
-	GetStopBySequenceAndRouteID(ctx context.Context, sequence int, routeID uint) (*model.Stop, error)
+	GetStopBySequenceAndRouteID(ctx context.Context, sequence int, routeID uint) (*models.Stop, error)
+	GetStopByID(ctx context.Context, routID uint, stopID uint) (*dto.StopResponse, error)
 }
 
 // Ensure that StopRepository implements the StopRepositoryInterface.
@@ -36,7 +37,7 @@ func NewStopRepository(db *gorm.DB) *StopRepository {
 	return &StopRepository{db: db}
 }
 
-func (repo *StopRepository) AddStopToRoute(ctx context.Context, stop model.Stop) (*dto.StopResponse, error) {
+func (repo *StopRepository) AddStopToRoute(ctx context.Context, stop models.Stop) (*dto.StopResponse, error) {
 	if err := repo.db.WithContext(ctx).Create(&stop).Error; err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (repo *StopRepository) AddStopToRoute(ctx context.Context, stop model.Stop)
 }
 
 func (repo *StopRepository) ListAllStopsForRoute(ctx context.Context, routeID uint) ([]dto.StopResponse, error) {
-	var stops []model.Stop
+	var stops []models.Stop
 	if err := repo.db.WithContext(ctx).
 		Where("route_id = ?", routeID).
 		Order("sequence asc").
@@ -66,7 +67,7 @@ func (repo *StopRepository) ListAllStopsForRoute(ctx context.Context, routeID ui
 	return stopResponses, nil
 }
 
-func (repo *StopRepository) UpdateStopDetails(ctx context.Context, stop model.Stop) (*dto.StopResponse, error) {
+func (repo *StopRepository) UpdateStopDetails(ctx context.Context, stop models.Stop) (*dto.StopResponse, error) {
 	if err := repo.db.WithContext(ctx).Save(&stop).Error; err != nil {
 		return nil, err
 	}
@@ -80,14 +81,14 @@ func (repo *StopRepository) UpdateStopDetails(ctx context.Context, stop model.St
 }
 
 func (repo *StopRepository) DeleteStop(ctx context.Context, routeID uint, stopID uint) error {
-	if err := repo.db.WithContext(ctx).Where("id = ? AND route_id = ?", stopID, routeID).Delete(&model.Stop{}).Error; err != nil {
+	if err := repo.db.WithContext(ctx).Where("id = ? AND route_id = ?", stopID, routeID).Delete(&models.Stop{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (repo *StopRepository) FindStopByID(ctx context.Context, stopID uint) (*dto.StopResponse, error) {
-	var stop model.Stop
+	var stop models.Stop
 	if err := repo.db.WithContext(ctx).First(&stop, stopID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrStopNotFound
@@ -101,7 +102,7 @@ func (repo *StopRepository) FindStopByID(ctx context.Context, stopID uint) (*dto
 func (repo *StopRepository) ReSequenceStops(ctx context.Context, routeID uint, deletedStopSequence int) error {
 	return repo.db.Transaction(func(tx *gorm.DB) error {
 		// Decrement the sequence numbers of all stops that had a higher sequence number than the deleted stop.
-		return tx.Model(&model.Stop{}).
+		return tx.Model(&models.Stop{}).
 			Where("route_id = ? AND sequence > ?", routeID, deletedStopSequence).
 			UpdateColumn("sequence", gorm.Expr("sequence - ?", 1)).Error
 	})
@@ -109,7 +110,7 @@ func (repo *StopRepository) ReSequenceStops(ctx context.Context, routeID uint, d
 
 func (repo *StopRepository) DeleteAndReSequenceStops(ctx context.Context, routeID uint, stopID uint) error {
 	return repo.db.Transaction(func(tx *gorm.DB) error {
-		var stop model.Stop
+		var stop models.Stop
 
 		// Find the stop to get its sequence for later re-sequencing
 		if err := tx.WithContext(ctx).Where("id = ? AND route_id = ?", stopID, routeID).First(&stop).Error; err != nil {
@@ -117,12 +118,12 @@ func (repo *StopRepository) DeleteAndReSequenceStops(ctx context.Context, routeI
 		}
 
 		// Delete the stop
-		if err := tx.WithContext(ctx).Delete(&model.Stop{}, stopID).Error; err != nil {
+		if err := tx.WithContext(ctx).Delete(&models.Stop{}, stopID).Error; err != nil {
 			return err
 		}
 
 		// Decrement the sequence numbers of all stops that had a higher sequence number than the deleted stop
-		if err := tx.WithContext(ctx).Model(&model.Stop{}).
+		if err := tx.WithContext(ctx).Model(&models.Stop{}).
 			Where("route_id = ? AND sequence > ?", routeID, stop.Sequence).
 			UpdateColumn("sequence", gorm.Expr("sequence - ?", 1)).Error; err != nil {
 			return err
@@ -132,9 +133,26 @@ func (repo *StopRepository) DeleteAndReSequenceStops(ctx context.Context, routeI
 	})
 }
 
+// GetStopByID retrieves a stop by its ID.
+func (repo *StopRepository) GetStopByID(ctx context.Context, routeID uint, stopID uint) (*dto.StopResponse, error) {
+	var stop models.Stop
+	if err := repo.db.WithContext(ctx).
+		Where("id = ? AND route_id = ?", stopID, routeID).
+		First(&stop).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrStopNotFound
+		}
+		return nil, err
+	}
+
+	stopResponse := mapStopToResponse(stop)
+	return &stopResponse, nil
+
+}
+
 // GetStopBySequenceAndRouteID retrieves a stop by its sequence number and route ID.
-func (repo *StopRepository) GetStopBySequenceAndRouteID(ctx context.Context, sequence int, routeID uint) (*model.Stop, error) {
-	var stop model.Stop
+func (repo *StopRepository) GetStopBySequenceAndRouteID(ctx context.Context, sequence int, routeID uint) (*models.Stop, error) {
+	var stop models.Stop
 	if err := repo.db.WithContext(ctx).
 		Where("sequence = ? AND route_id = ?", sequence, routeID).
 		First(&stop).Error; err != nil {
@@ -143,8 +161,8 @@ func (repo *StopRepository) GetStopBySequenceAndRouteID(ctx context.Context, seq
 	return &stop, nil
 }
 
-// mapStopToResponse maps a model.Stop to a dto.StopResponse.
-func mapStopToResponse(stop model.Stop) dto.StopResponse {
+// mapStopToResponse maps a models.Stop to a dto.StopResponse.
+func mapStopToResponse(stop models.Stop) dto.StopResponse {
 	return dto.StopResponse{
 		StopID:    stop.ID,
 		Name:      stop.Name,

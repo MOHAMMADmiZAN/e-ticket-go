@@ -1,6 +1,6 @@
-// @title           My Route Service API
+// @title           My Bus Service API
 // @version         1.0
-// @description     This API serves as an interface to interact with the My Route Service platform, providing endpoints for managing bus routes, bookings, and user interactions.
+// @description     This API serves as an interface to interact with the My Bus Service platform, providing endpoints for managing bus routes, bookings, and user interactions.
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name    Mohammad Mizan
@@ -10,17 +10,17 @@
 // @license.name    Apache License Version 2.0
 // @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host            localhost:8080
+// @host            localhost:8081
 // @BasePath        /api/v1
 package main
 
 import (
+	"bus-service/internal/api"
+	"bus-service/internal/config"
+	"bus-service/internal/models"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"route-service/internal/api"
-	"route-service/internal/config"
-	"route-service/internal/models"
 	"strconv"
 )
 
@@ -29,7 +29,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading environment variables from system")
 	}
-	database := config.NewDatabase(&models.Route{}, &models.Stop{}, &models.Schedule{})
+	database := config.NewDatabase(&models.Bus{})
 	defer database.Close()
 
 	// Get the port number from the environment variable.

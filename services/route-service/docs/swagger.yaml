@@ -1,4 +1,31 @@
+basePath: /api/v1
 definitions:
+  dto.AddScheduleRequest:
+    properties:
+      arrival_time:
+        type: string
+      departure_time:
+        type: string
+      route_id:
+        type: integer
+      stop_id:
+        type: integer
+    required:
+    - arrival_time
+    - departure_time
+    - route_id
+    - stop_id
+    type: object
+  dto.AddStopRequest:
+    properties:
+      name:
+        type: string
+      sequence:
+        type: integer
+    required:
+    - name
+    - sequence
+    type: object
   dto.RouteCreateRequest:
     properties:
       duration:
@@ -38,6 +65,30 @@ definitions:
       updated_at:
         type: string
     type: object
+  dto.RouteResponse:
+    properties:
+      createdAt:
+        type: string
+      duration:
+        type: integer
+      endLocation:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      startLocation:
+        type: string
+      startTime:
+        type: string
+      stops:
+        description: Nested Stops within RouteResponse
+        items:
+          $ref: '#/definitions/dto.StopResponse'
+        type: array
+      updatedAt:
+        type: string
+    type: object
   dto.RouteUpdateRequest:
     properties:
       duration:
@@ -51,15 +102,465 @@ definitions:
       startTime:
         type: string
     type: object
-  util.ErrorMessage:
+  dto.ScheduleResponse:
+    properties:
+      arrival_time:
+        type: string
+      created_at:
+        type: string
+      departure_time:
+        type: string
+      schedule_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  dto.StopResponse:
+    properties:
+      created_at:
+        type: string
+      name:
+        type: string
+      schedules:
+        description: Nested Schedules within StopResponse
+        items:
+          $ref: '#/definitions/dto.ScheduleResponse'
+        type: array
+      sequence:
+        type: integer
+      stop_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  dto.UpdateScheduleRequest:
+    properties:
+      arrival_time:
+        type: string
+      departure_time:
+        type: string
+      route_id:
+        type: integer
+      stop_id:
+        type: integer
+    required:
+    - arrival_time
+    - departure_time
+    - route_id
+    - stop_id
+    type: object
+  dto.UpdateStopRequest:
+    properties:
+      name:
+        type: string
+      sequence:
+        type: integer
+    type: object
+  pkg.ErrorMessage:
     properties:
       message:
         type: string
     type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: takbir.jcd@gmail.com
+    name: Mohammad Mizan
+    url: http://swagger.io/support
+  description: This API serves as an interface to interact with the My Route Service
+    platform, providing endpoints for managing bus routes, bookings, and user interactions.
+  license:
+    name: Apache License Version 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: My Route Service API
+  version: "1.0"
 paths:
-  /api/v1/routes:
+  /{routeId}/schedules:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all schedules for a route by its ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of schedules
+          schema:
+            items:
+              $ref: '#/definitions/dto.ScheduleResponse'
+            type: array
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      description: Create a new schedule for a specific route.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Schedule information
+        in: body
+        name: addScheduleRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created schedule details
+          schema:
+            $ref: '#/definitions/dto.ScheduleResponse'
+        "400":
+          description: Invalid route ID, request format, or validation error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
+  /{routeId}/schedules/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a schedule by its ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Schedule ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid schedule ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Schedule not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a schedule by its ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Schedule ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Schedule details
+          schema:
+            $ref: '#/definitions/dto.ScheduleResponse'
+        "400":
+          description: Invalid schedule ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Schedule not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
+    put:
+      consumes:
+      - application/json
+      description: Update details of a schedule by its ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Schedule ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: Updated schedule information
+        in: body
+        name: updateScheduleRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated schedule details
+          schema:
+            $ref: '#/definitions/dto.ScheduleResponse'
+        "400":
+          description: Invalid schedule ID or request format
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Schedule not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
+  /{routeId}/stops:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of stops for a given route.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: stops
+          schema:
+            items:
+              $ref: '#/definitions/dto.StopResponse'
+            type: array
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Stops
+    post:
+      consumes:
+      - application/json
+      description: Add a new stop to the specified route.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Stop information
+        in: body
+        name: stop
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddStopRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: createdStop
+          schema:
+            $ref: '#/definitions/dto.StopResponse'
+        "400":
+          description: Invalid request or incorrect data
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Stops
+  /{routeId}/stops/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a stop from a given route.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Stop ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid route ID or stop ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route or stop not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Stops
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a stop by its unique ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Stop ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: stop
+          schema:
+            $ref: '#/definitions/dto.StopResponse'
+        "400":
+          description: Invalid route ID or stop ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route or stop not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Stops
+    put:
+      consumes:
+      - application/json
+      description: Update details of a stop for a given route.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Stop ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: Updated stop information
+        in: body
+        name: updateStopRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateStopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: updatedStop
+          schema:
+            $ref: '#/definitions/dto.StopResponse'
+        "400":
+          description: Invalid route ID or stop ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route or stop not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Stops
+  /routes:
     get:
       consumes:
       - application/json
@@ -76,7 +577,7 @@ paths:
         "500":
           description: Unable to retrieve routes
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
       summary: Retrieve all routes
       tags:
       - routes
@@ -109,7 +610,7 @@ paths:
       summary: Add a new route
       tags:
       - routes
-  /api/v1/routes/{id}:
+  /routes/{id}:
     delete:
       consumes:
       - application/json
@@ -128,11 +629,11 @@ paths:
         "400":
           description: Invalid route ID
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
         "500":
           description: Unable to delete route
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
       summary: Delete a route
       tags:
       - routes
@@ -152,19 +653,19 @@ paths:
         "200":
           description: Successfully retrieved route
           schema:
-            $ref: '#/definitions/dto.RouteInfo'
+            $ref: '#/definitions/dto.RouteResponse'
         "400":
           description: Invalid route ID
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
         "404":
           description: Route not found
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
         "500":
           description: Unable to retrieve route
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
       summary: Get route by ID
       tags:
       - routes
@@ -195,11 +696,11 @@ paths:
         "400":
           description: Invalid route ID or request format
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
         "500":
           description: Internal Server Error - Unable to update route
           schema:
-            $ref: '#/definitions/util.ErrorMessage'
+            $ref: '#/definitions/pkg.ErrorMessage'
       summary: Update a route
       tags:
       - routes

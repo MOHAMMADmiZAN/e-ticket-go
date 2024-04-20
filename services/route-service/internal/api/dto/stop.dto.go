@@ -8,8 +8,8 @@ type AddStopRequest struct {
 }
 
 type UpdateStopRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Sequence int    `json:"sequence" binding:"required,gt=0"`
+	Name     string `json:"name" binding:"omitempty"`
+	Sequence int    `json:"sequence" binding:"omitempty,gt=0"`
 }
 
 type StopResponse struct {

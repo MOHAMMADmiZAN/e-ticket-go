@@ -2,7 +2,7 @@ package dto
 
 import (
 	"errors"
-	"route-service/internal/model"
+	"route-service/internal/models"
 	"time"
 )
 
@@ -42,9 +42,9 @@ func (a *AddScheduleRequest) Validate() error {
 	return nil // No error means the request is valid.
 }
 
-// ToModel converts AddScheduleRequest to the Schedule model.
-func (a *AddScheduleRequest) ToModel() *model.Schedule {
-	return &model.Schedule{
+// ToModel converts AddScheduleRequest to the Schedule models.
+func (a *AddScheduleRequest) ToModel() *models.Schedule {
+	return &models.Schedule{
 		RouteID:       a.RouteID,
 		StopID:        a.StopID,
 		ArrivalTime:   a.ArrivalTime,
@@ -77,10 +77,10 @@ func (u *UpdateScheduleRequest) Validate() error {
 	return nil // No error means the request is valid.
 }
 
-// ToModel converts UpdateScheduleRequest to the Schedule model.
+// ToModel converts UpdateScheduleRequest to the Schedule models.
 // This would be used when an existing Schedule is being updated, hence no ID field is needed.
-func (u *UpdateScheduleRequest) ToModel() *model.Schedule {
-	return &model.Schedule{
+func (u *UpdateScheduleRequest) ToModel() *models.Schedule {
+	return &models.Schedule{
 		RouteID:       u.RouteID,
 		StopID:        u.StopID,
 		ArrivalTime:   u.ArrivalTime,

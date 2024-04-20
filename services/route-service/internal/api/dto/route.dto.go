@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"route-service/internal/model"
+	"route-service/internal/models"
 	"time"
 )
 
@@ -32,8 +32,8 @@ type RouteResponse struct {
 	StartLocation string         `json:"startLocation"`
 	EndLocation   string         `json:"endLocation"`
 	Stops         []StopResponse `json:"stops"` // Nested Stops within RouteResponse
-	CreatedAt     time.Time      `json:"createdAt"`
-	UpdatedAt     time.Time      `json:"updatedAt"`
+	CreatedAt     string         `json:"createdAt"`
+	UpdatedAt     string         `json:"updatedAt"`
 }
 
 // RouteUpdateRequest represents the request to update a route.
@@ -45,9 +45,9 @@ type RouteUpdateRequest struct {
 	EndLocation   *string    `json:"endLocation,omitempty"`
 }
 
-// ToModel write a function to covert dto to model
-func (r *RouteCreateRequest) ToModel() *model.Route {
-	return &model.Route{
+// ToModel write a function to covert dto to models
+func (r *RouteCreateRequest) ToModel() *models.Route {
+	return &models.Route{
 		Name:          r.Name,
 		StartTime:     r.StartTime,
 		Duration:      r.Duration,
@@ -56,9 +56,9 @@ func (r *RouteCreateRequest) ToModel() *model.Route {
 	}
 }
 
-func (r *RouteUpdateRequest) ToModel(existingRouteResponse *RouteResponse) *model.Route {
-	// Initialize a Route model with the values from the existing RouteResponse.
-	updatedModel := &model.Route{
+func (r *RouteUpdateRequest) ToModel(existingRouteResponse *RouteResponse) *models.Route {
+	// Initialize a Route models with the values from the existing RouteResponse.
+	updatedModel := &models.Route{
 		Name:          existingRouteResponse.Name,
 		StartTime:     existingRouteResponse.StartTime,
 		Duration:      existingRouteResponse.Duration,
@@ -67,7 +67,7 @@ func (r *RouteUpdateRequest) ToModel(existingRouteResponse *RouteResponse) *mode
 		ID:            existingRouteResponse.ID,
 	}
 
-	// Overwrite the model fields with the values from the RouteUpdateRequest if provided.
+	// Overwrite the models fields with the values from the RouteUpdateRequest if provided.
 	if r.Name != nil {
 		updatedModel.Name = *r.Name
 	}
@@ -87,7 +87,7 @@ func (r *RouteUpdateRequest) ToModel(existingRouteResponse *RouteResponse) *mode
 	return updatedModel
 }
 
-func RouteModelToRouteInfo(route *model.Route) RouteInfo {
+func RouteModelToRouteInfo(route *models.Route) RouteInfo {
 	return RouteInfo{
 		RouteID:         route.ID,
 		Name:            route.Name,

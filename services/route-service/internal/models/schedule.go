@@ -1,7 +1,6 @@
-package model
+package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -16,5 +15,10 @@ type Schedule struct {
 	Stop          Stop      `gorm:"foreignkey:StopID"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	DeletedAt     time.Time `gorm:"index"`
+}
+
+func (Schedule) TableName() string {
+	return "schedules"
+
 }

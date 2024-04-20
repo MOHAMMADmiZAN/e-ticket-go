@@ -1,20 +1,20 @@
-package service
+package services
 
 import (
 	"context"
 	"fmt"
 	"route-service/internal/api/dto"
-	"route-service/internal/model"
+	"route-service/internal/models"
 	"route-service/internal/repository"
 	"time"
 )
 
 type ScheduleService interface {
-	CreateSchedule(ctx context.Context, newSchedule model.Schedule) (*dto.ScheduleResponse, error)
-	GetScheduleByID(ctx context.Context, scheduleID uint) (*dto.ScheduleResponse, error)
+	CreateSchedule(ctx context.Context, newSchedule models.Schedule) (*dto.ScheduleResponse, error)
+	GetScheduleByID(ctx context.Context, scheduleID uint, routeID uint) (*dto.ScheduleResponse, error)
 	GetSchedulesByRouteID(ctx context.Context, routeID uint) ([]dto.ScheduleResponse, error)
-	UpdateSchedule(ctx context.Context, scheduleID uint, updateSchedule model.Schedule) (*dto.ScheduleResponse, error)
-	DeleteSchedule(ctx context.Context, scheduleID uint) error
+	UpdateSchedule(ctx context.Context, scheduleID uint, updateSchedule models.Schedule) (*dto.ScheduleResponse, error)
+	DeleteSchedule(ctx context.Context, scheduleID uint, routeID uint) error
 }
 
 type scheduleService struct {
@@ -31,7 +31,7 @@ func NewScheduleService(repo repository.ScheduleRepository, cacheTTL time.Durati
 	}
 }
 
-func (s *scheduleService) CreateSchedule(ctx context.Context, newSchedule model.Schedule) (*dto.ScheduleResponse, error) {
+func (s *scheduleService) CreateSchedule(ctx context.Context, newSchedule models.Schedule) (*dto.ScheduleResponse, error) {
 
 	resp, err := s.repo.CreateSchedule(ctx, &newSchedule)
 	if err != nil {
@@ -46,15 +46,15 @@ func (s *scheduleService) CreateSchedule(ctx context.Context, newSchedule model.
 	return resp, nil
 }
 
-func (s *scheduleService) GetScheduleByID(ctx context.Context, scheduleID uint) (*dto.ScheduleResponse, error) {
+func (s *scheduleService) GetScheduleByID(ctx context.Context, scheduleID uint, routeID uint) (*dto.ScheduleResponse, error) {
 	// Check if the schedule is in the cache
 	if cachedSchedule, found := s.cache[scheduleID]; found {
 		// Log cache hit
 		return cachedSchedule, nil
 	}
-
 	// Log cache miss and fetch from repository
-	resp, err := s.repo.GetScheduleByID(ctx, scheduleID)
+	resp, err := s.repo.GetScheduleByID(ctx, scheduleID, routeID)
+
 	if err != nil {
 		// Log repository error
 		return nil, fmt.Errorf("getting schedule by ID: %w", err)
@@ -79,7 +79,7 @@ func (s *scheduleService) GetSchedulesByRouteID(ctx context.Context, routeID uin
 	return resp, nil
 }
 
-func (s *scheduleService) UpdateSchedule(ctx context.Context, scheduleID uint, updateSchedule model.Schedule) (*dto.ScheduleResponse, error) {
+func (s *scheduleService) UpdateSchedule(ctx context.Context, scheduleID uint, updateSchedule models.Schedule) (*dto.ScheduleResponse, error) {
 
 	resp, err := s.repo.UpdateSchedule(ctx, &updateSchedule)
 	if err != nil {
@@ -94,8 +94,8 @@ func (s *scheduleService) UpdateSchedule(ctx context.Context, scheduleID uint, u
 	return resp, nil
 }
 
-func (s *scheduleService) DeleteSchedule(ctx context.Context, scheduleID uint) error {
-	err := s.repo.DeleteSchedule(ctx, scheduleID)
+func (s *scheduleService) DeleteSchedule(ctx context.Context, scheduleID uint, routeID uint) error {
+	err := s.repo.DeleteSchedule(ctx, scheduleID, routeID)
 	if err != nil {
 		// Log repository error
 		return fmt.Errorf("deleting schedule: %w", err)

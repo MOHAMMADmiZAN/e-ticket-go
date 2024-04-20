@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"gorm.io/gorm"
@@ -15,4 +15,8 @@ type Stop struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+func (Stop) TableName() string {
+	return "stops"
 }

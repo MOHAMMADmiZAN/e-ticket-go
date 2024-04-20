@@ -1,6 +1,12 @@
 package api
 
 import (
+	_ "bus-service/docs" // Required for Swagger docs
+	"bus-service/internal/api/handler"
+	"bus-service/internal/api/middleware"
+	"bus-service/internal/config"
+	"bus-service/internal/repository"
+	"bus-service/internal/services"
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -10,12 +16,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	_ "route-service/docs" // Required for Swagger docs
-	"route-service/internal/api/handler"
-	"route-service/internal/api/middleware"
-	"route-service/internal/config"
-	"route-service/internal/repository"
-	"route-service/internal/services"
 	"syscall"
 	"time"
 )
@@ -32,7 +32,6 @@ func NewServer(databaseClient *config.Database) *Server {
 	r.Use(gin.Recovery(), gin.Logger(), middleware.ErrorHandlingMiddleware()) // Add Logger middleware
 	// Swagger documentation
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-
 	s := &Server{
 		Router: r,
 		DB:     databaseClient,
@@ -43,10 +42,8 @@ func NewServer(databaseClient *config.Database) *Server {
 
 // routes registers all the routes to the router.
 func (s *Server) routes() {
-	// Define handlers
-	rh := handler.NewRouteHandler(services.NewRouteService(repository.NewRouteRepository(s.DB.Conn)))
-	sh := handler.NewStopHandler(services.NewStopService(repository.NewStopRepository(s.DB.Conn)))
-	sch := handler.NewScheduleHandler(services.NewScheduleService(repository.NewScheduleRepository(s.DB.Conn), 5*time.Minute))
+
+	b := handler.NewBusHandler(services.NewBusService(repository.NewBusRepository(s.DB.Conn)))
 
 	// API Versioning
 	v1 := s.Router.Group("/api/v1")
@@ -54,14 +51,8 @@ func (s *Server) routes() {
 	// Health check route
 	s.setupHealthCheckRoute()
 
-	// Setup route groups
-	s.setupRouteHandlers(v1, rh)
-
-	// Setup stop handlers
-	s.setupStopHandlers(v1, sh)
-
-	// Setup schedule handlers
-	s.setupScheduleHandlers(v1, sch)
+	// Setup bus handlers
+	s.setupBusRoutes(v1, b)
 
 	// Catch-all route for handling unmatched routes (404 Not Found)
 	s.setupNoRouteHandler()
@@ -69,7 +60,7 @@ func (s *Server) routes() {
 
 func (s *Server) setupHealthCheckRoute() {
 	s.Router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "Route services is running"})
+		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "Bus services is running"})
 	})
 }
 
@@ -87,39 +78,18 @@ func (s *Server) setupNoRouteHandler() {
 	})
 }
 
-func (s *Server) setupRouteHandlers(v1 *gin.RouterGroup, rh *handler.RouteHandler) {
-	routesGroup := v1.Group("/routes")
-	// Route handlers
+// setup Bus routes
+func (s *Server) setupBusRoutes(v1 *gin.RouterGroup, b *handler.BusHandler) {
+	//bus routes
+	busGroup := v1.Group("/buses")
 	{
-		routesGroup.POST("/", rh.CreateRoute)
-		routesGroup.GET("/", rh.GetAllRoutes)
-		routesGroup.GET("/:id", rh.GetRouteByID)
-		routesGroup.PUT("/:id", rh.UpdateRoute)
-		routesGroup.DELETE("/:id", rh.DeleteRoute)
+		busGroup.GET("/", b.GetAllBuses)
+		busGroup.POST("/", b.CreateBus)
+		busGroup.GET("/:id", b.GetBusByID)
+		busGroup.PUT("/:id", b.UpdateBus)
+		busGroup.DELETE("/:id", b.DeleteBus)
 	}
-}
 
-func (s *Server) setupStopHandlers(v1 *gin.RouterGroup, sh handler.StopHandlerInterface) {
-	stopsGroup := v1.Group("/:routeId/stops")
-	// Stop handlers
-	{
-		stopsGroup.GET("/", sh.ListStopsForRoute)
-		stopsGroup.POST("/", sh.AddStopToRoute)
-		stopsGroup.GET("/:id", sh.GetStopByID)
-		stopsGroup.PUT("/:id", sh.UpdateStop)
-		stopsGroup.DELETE("/:id", sh.DeleteStop)
-	}
-}
-
-func (s *Server) setupScheduleHandlers(v1 *gin.RouterGroup, sch *handler.ScheduleHandler) {
-	schedulesGroup := v1.Group("/:routeId/schedules")
-	{
-		schedulesGroup.POST("/", sch.CreateSchedule)
-		schedulesGroup.GET("/", sch.GetSchedulesByRouteID)
-		schedulesGroup.GET("/:id", sch.GetScheduleByID)
-		schedulesGroup.PUT("/:id", sch.UpdateSchedule)
-		schedulesGroup.DELETE("/:id", sch.DeleteSchedule)
-	}
 }
 
 // Start runs the HTTP server on a specific address.
