@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"gorm.io/gorm"
@@ -39,4 +39,8 @@ func (r *Route) AfterFind(tx *gorm.DB) (err error) {
 	log.Printf("Route with ID %d has been found", r.ID)
 	// You can perform additional operations or transformations here
 	return nil
+}
+
+func (Route) TableName() string {
+	return "routes"
 }

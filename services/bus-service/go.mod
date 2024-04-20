@@ -1,10 +1,11 @@
-module route-service
+module bus-service
 
 go 1.21.1
 
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.19.0
+	github.com/go-resty/resty/v2 v2.12.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/swaggo/files v1.0.1

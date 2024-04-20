@@ -55,6 +55,27 @@ services:
     volumes:
       - ./services/route-service:/app  # Mount the route-service directory to the container for development purposes oNLY (optional)
 
+  bus-service:
+    build:
+      context: ./services/bus-service
+      dockerfile: deployments/Dockerfile
+      args:
+        - ENV=${ENV}
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${BUS_POSTGRES_DB}
+    env_file:
+      - ./services/bus-service/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend-network
+    restart: on-failure
+    volumes:
+      - ./services/bus-service:/app
+
 networks:
   backend-network:
     driver: bridge

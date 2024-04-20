@@ -1,0 +1,270 @@
+basePath: /api/v1
+definitions:
+  dto.BusResponse:
+    properties:
+      busCode:
+        type: string
+      capacity:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      lastServiceDate:
+        type: string
+      licensePlate:
+        type: string
+      makeModel:
+        type: string
+      nextServiceDate:
+        type: string
+      routeId:
+        type: integer
+      status:
+        type: string
+      updatedAt:
+        type: string
+      year:
+        type: integer
+    type: object
+  dto.CreateBusDTO:
+    properties:
+      busCode:
+        maxLength: 100
+        type: string
+      capacity:
+        type: integer
+      lastServiceDate:
+        type: string
+      licensePlate:
+        maxLength: 20
+        type: string
+      makeModel:
+        maxLength: 100
+        type: string
+      nextServiceDate:
+        type: string
+      routeId:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        - in_service
+        - out_of_service
+        type: string
+      year:
+        description: Assuming year range from 1900 to 2100
+        type: integer
+    required:
+    - busCode
+    - capacity
+    - lastServiceDate
+    - licensePlate
+    - makeModel
+    - nextServiceDate
+    - routeId
+    - status
+    - year
+    type: object
+  dto.UpdateBusDTO:
+    properties:
+      busCode:
+        maxLength: 100
+        type: string
+      capacity:
+        type: integer
+      lastServiceDate:
+        type: string
+      licensePlate:
+        maxLength: 20
+        type: string
+      makeModel:
+        maxLength: 100
+        type: string
+      nextServiceDate:
+        type: string
+      routeId:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        - in_service
+        - out_of_service
+        type: string
+      year:
+        description: Assuming year range from 1900 to 2100
+        type: integer
+    type: object
+  handler.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8081
+info:
+  contact:
+    email: takbir.jcd@gmail.com
+    name: Mohammad Mizan
+    url: http://swagger.io/support
+  description: This API serves as an interface to interact with the My Bus Service
+    platform, providing endpoints for managing bus routes, bookings, and user interactions.
+  license:
+    name: Apache License Version 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: My Bus Service API
+  version: "1.0"
+paths:
+  /buses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all buses from the bus service.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all buses
+          schema:
+            items:
+              $ref: '#/definitions/dto.BusResponse'
+            type: array
+        "500":
+          description: Internal Server Error - Could not retrieve buses
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Get all buses
+      tags:
+      - buses
+    post:
+      consumes:
+      - application/json
+      description: Add a new bus to the system with the provided details.
+      parameters:
+      - description: Bus Creation Data
+        in: body
+        name: bus
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBusDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created bus
+          schema:
+            $ref: '#/definitions/dto.BusResponse'
+        "400":
+          description: Bad Request - Invalid input provided
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "500":
+          description: Internal Server Error - Unable to create bus
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Create a new bus
+      tags:
+      - buses
+  /buses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the bus with the specified ID.
+      parameters:
+      - description: Bus ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bus deleted successfully
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "400":
+          description: Bad Request - Invalid bus ID
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "404":
+          description: Not Found - Bus not found
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "500":
+          description: Internal Server Error - Unable to delete bus
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Delete a bus
+      tags:
+      - buses
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific bus by its ID.
+      parameters:
+      - description: Bus ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved bus
+          schema:
+            $ref: '#/definitions/dto.BusResponse'
+        "400":
+          description: Bad Request - Invalid ID format or Bus not found
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Get bus by ID
+      tags:
+      - buses
+    put:
+      consumes:
+      - application/json
+      description: Update the details of a specific bus by its ID.
+      parameters:
+      - description: Bus ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Bus Update Data
+        in: body
+        name: bus
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBusDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bus updated successfully
+          schema:
+            $ref: '#/definitions/dto.BusResponse'
+        "400":
+          description: Bad Request - Invalid ID or update data format
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "404":
+          description: Not Found - Bus not found
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "500":
+          description: Internal Server Error - Could not update bus
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Update bus details
+      tags:
+      - buses
+swagger: "2.0"

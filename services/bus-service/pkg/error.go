@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"github.com/go-playground/validator/v10"
-	"log"
 	"reflect"
 )
 
@@ -22,8 +21,6 @@ type ErrorResponse struct {
 // It uses the json tags of the dto to return field names as they are in the json request.
 func FormatValidationError(err error, dtoType interface{}) []ValidationError {
 	var errors []ValidationError
-	log.Print("dtoType:", dtoType)
-
 	valErrs := err.(validator.ValidationErrors)
 	dtoVal := reflect.TypeOf(dtoType)
 

@@ -1,10 +1,10 @@
-package service
+package services
 
 import (
 	"context"
 	"fmt"
 	"route-service/internal/api/dto"
-	"route-service/internal/model"
+	"route-service/internal/models"
 	"route-service/internal/repository"
 	"route-service/pkg"
 )
@@ -22,7 +22,7 @@ func NewRouteService(repo *repository.RouteRepository) *RouteService {
 }
 
 // CreateRoute handles the creation of a new route.
-func (s *RouteService) CreateRoute(ctx context.Context, route *model.Route) (*model.Route, error) {
+func (s *RouteService) CreateRoute(ctx context.Context, route *models.Route) (*models.Route, error) {
 	err := s.repo.Create(ctx, route)
 	// Return  Route Response
 
@@ -65,7 +65,7 @@ func (s *RouteService) GetRouteByID(ctx context.Context, id uint) (*dto.RouteRes
 }
 
 // UpdateRoute updates an existing route's details based on the provided request.
-func (s *RouteService) UpdateRoute(ctx context.Context, route *model.Route) (*model.Route, error) {
+func (s *RouteService) UpdateRoute(ctx context.Context, route *models.Route) (*models.Route, error) {
 
 	if err := s.repo.Update(ctx, route); err != nil {
 		return nil, fmt.Errorf("error updating route: %v", err)
@@ -79,10 +79,10 @@ func (s *RouteService) DeleteRoute(ctx context.Context, id uint) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func MapRouteModelToRouteResponse(route *model.Route) *dto.RouteResponse {
+func MapRouteModelToRouteResponse(route *models.Route) *dto.RouteResponse {
 	stopsResponse := make([]dto.StopResponse, 0, len(route.Stops))
 
-	// Assuming Schedules are directly related to the Route and not nested under Stops in your model.
+	// Assuming Schedules are directly related to the Route and not nested under Stops in your models.
 	// We'll need to filter these Schedules to match them with their respective Stops.
 	for _, stop := range route.Stops {
 		// Filter schedules for this specific stop
@@ -124,8 +124,8 @@ func MapRouteModelToRouteResponse(route *model.Route) *dto.RouteResponse {
 
 // filterSchedulesForStop takes a slice of all Schedules related to the Route and a StopID,
 // and returns a filtered slice of Schedules that belong to the Stop.
-func filterSchedulesForStop(allSchedules []model.Schedule, stopID uint) []model.Schedule {
-	filtered := make([]model.Schedule, 0)
+func filterSchedulesForStop(allSchedules []models.Schedule, stopID uint) []models.Schedule {
+	filtered := make([]models.Schedule, 0)
 	for _, schedule := range allSchedules {
 		if schedule.StopID == stopID {
 			filtered = append(filtered, schedule)

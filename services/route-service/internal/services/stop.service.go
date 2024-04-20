@@ -1,11 +1,12 @@
-package service
+package services
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"route-service/internal/api/dto"
-	"route-service/internal/model"
+	"route-service/internal/models"
 	"route-service/internal/repository"
 )
 
@@ -17,12 +18,13 @@ var (
 	ErrSequenceNotAvailable = errors.New("the sequence is not available for the stop")
 )
 
-// StopServiceInterface defines the service operations for stops.
+// StopServiceInterface defines the services operations for stops.
 type StopServiceInterface interface {
-	AddStopToRoute(ctx context.Context, routeID uint, stop model.Stop) (*dto.StopResponse, error)
+	AddStopToRoute(ctx context.Context, routeID uint, stop models.Stop) (*dto.StopResponse, error)
 	GetStopsByRouteID(ctx context.Context, routeID uint) ([]dto.StopResponse, error)
-	UpdateStop(ctx context.Context, routeID uint, stopID uint, stop model.Stop) (*dto.StopResponse, error)
+	UpdateStop(ctx context.Context, routeID uint, stopID uint, stop models.Stop) (*dto.StopResponse, error)
 	DeleteStop(ctx context.Context, routeID uint, stopID uint) error
+	GetStopByID(ctx context.Context, routeID uint, stopID uint) (*dto.StopResponse, error)
 }
 
 // Ensure StopService adheres to the StopServiceInterface.
@@ -40,7 +42,7 @@ func NewStopService(stopRepo repository.StopRepositoryInterface) *StopService {
 }
 
 // AddStopToRoute handles the business logic for adding a stop to a route.
-func (s *StopService) AddStopToRoute(ctx context.Context, routeID uint, stop model.Stop) (*dto.StopResponse, error) {
+func (s *StopService) AddStopToRoute(ctx context.Context, routeID uint, stop models.Stop) (*dto.StopResponse, error) {
 	if stop.RouteID != routeID {
 		return nil, ErrInvalidRouteID
 	}
@@ -72,7 +74,7 @@ func newRouteIDMismatchError(expected, found uint) error {
 }
 
 // UpdateStop updates the details of a specific stop.
-func (s *StopService) UpdateStop(ctx context.Context, routeID uint, stopID uint, updatedStop model.Stop) (*dto.StopResponse, error) {
+func (s *StopService) UpdateStop(ctx context.Context, routeID uint, stopID uint, updatedStop models.Stop) (*dto.StopResponse, error) {
 	if updatedStop.RouteID != routeID {
 		return nil, ErrInvalidRouteID
 	}
@@ -100,6 +102,14 @@ func (s *StopService) UpdateStop(ctx context.Context, routeID uint, stopID uint,
 			return nil, ErrStopNameConflict
 		}
 	}
+	if updatedStop.Name == "" {
+		updatedStop.Name = existingStop.Name
+
+	}
+	if updatedStop.Sequence == 0 {
+		updatedStop.Sequence = existingStop.Sequence
+	}
+	log.Print("Updated Stop: ", updatedStop)
 	// Update the stop details
 	return s.stopRepo.UpdateStopDetails(ctx, updatedStop)
 }
@@ -108,4 +118,9 @@ func (s *StopService) UpdateStop(ctx context.Context, routeID uint, stopID uint,
 func (s *StopService) DeleteStop(ctx context.Context, routeID uint, stopID uint) error {
 	// The method DeleteAndReSequenceStops now encapsulates the whole transaction.
 	return s.stopRepo.DeleteAndReSequenceStops(ctx, routeID, stopID)
+}
+
+// GetStopByID retrieves a stop by its ID.
+func (s *StopService) GetStopByID(ctx context.Context, routeID uint, stopID uint) (*dto.StopResponse, error) {
+	return s.stopRepo.GetStopByID(ctx, routeID, stopID)
 }
