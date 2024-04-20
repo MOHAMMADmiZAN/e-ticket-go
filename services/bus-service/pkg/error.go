@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"github.com/go-playground/validator/v10"
+	"log"
 	"reflect"
 )
 
@@ -30,6 +31,14 @@ func FormatValidationError(err error, dtoType interface{}) []ValidationError {
 		fieldName := jsonTag
 		if found && jsonTag == "" {
 			fieldName = field.Name
+		}
+		if fieldName == "status" && fe.ActualTag() == "oneof" {
+			log.Print("status validation error")
+			errors = append(errors, ValidationError{
+				Field:   fieldName,
+				Message: "status must be one of 'active', 'maintenance','decommissioned'",
+			})
+			continue
 		}
 
 		errors = append(errors, ValidationError{

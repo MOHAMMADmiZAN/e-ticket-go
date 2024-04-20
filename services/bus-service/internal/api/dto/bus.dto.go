@@ -2,9 +2,8 @@ package dto
 
 import (
 	"bus-service/internal/models"
-	"time"
-
 	"github.com/go-playground/validator/v10"
+	"time"
 )
 
 // CreateBusDTO is used when creating a new bus. It includes validation tags.
@@ -15,7 +14,7 @@ type CreateBusDTO struct {
 	MakeModel       string    `json:"makeModel" binding:"required,max=100"`
 	Year            int       `json:"year" binding:"required,gt=1900,lt=2100"` // Assuming year range from 1900 to 2100
 	LicensePlate    string    `json:"licensePlate" binding:"required,alphanum,max=20"`
-	Status          string    `json:"status" binding:"required,oneof='active' 'inactive' 'in_service' 'out_of_service'"`
+	Status          string    `json:"status" binding:"required,oneof='active''maintenance''decommissioned'"`
 	LastServiceDate time.Time `json:"lastServiceDate" binding:"required"`
 	NextServiceDate time.Time `json:"nextServiceDate" binding:"required,gtfield=LastServiceDate"`
 }
@@ -28,7 +27,7 @@ type UpdateBusDTO struct {
 	MakeModel       string    `json:"makeModel" binding:"omitempty,max=100"`
 	Year            int       `json:"year" binding:"omitempty,gt=1900,lt=2100"` // Assuming year range from 1900 to 2100
 	LicensePlate    string    `json:"licensePlate" binding:"omitempty,alphanum,max=20"`
-	Status          string    `json:"status" binding:"omitempty,oneof='active' 'inactive' 'in_service' 'out_of_service'"`
+	Status          string    `json:"status" binding:"omitempty,oneof='active''maintenance''decommissioned'"`
 	LastServiceDate time.Time `json:"lastServiceDate"`
 	NextServiceDate time.Time `json:"nextServiceDate" binding:"omitempty,gtfield=LastServiceDate"`
 }
@@ -59,7 +58,7 @@ func (dto *CreateBusDTO) ToModel() models.Bus {
 }
 
 // ToModel converts UpdateBusDTO to Bus model.
-func (dto *UpdateBusDTO) ToModel(bus *models.Bus) {
+func (dto *UpdateBusDTO) ToModel(bus *models.Bus) *models.Bus {
 	if dto.RouteID != 0 {
 		bus.RouteID = dto.RouteID
 	}
@@ -87,6 +86,7 @@ func (dto *UpdateBusDTO) ToModel(bus *models.Bus) {
 	if !dto.NextServiceDate.IsZero() {
 		bus.NextServiceDate = dto.NextServiceDate
 	}
+	return bus
 }
 
 type BusResponse struct {
@@ -120,4 +120,39 @@ func FromModel(bus models.Bus) BusResponse {
 		CreatedAt:       bus.CreatedAt,
 		UpdatedAt:       bus.UpdatedAt,
 	}
+}
+
+type RouteResponse struct {
+	ID            uint           `json:"id"`
+	Name          string         `json:"name"`
+	StartTime     time.Time      `json:"startTime"`
+	Duration      int            `json:"duration"`
+	StartLocation string         `json:"startLocation"`
+	EndLocation   string         `json:"endLocation"`
+	Stops         []StopResponse `json:"stops"`
+	CreatedAt     string         `json:"createdAt"`
+	UpdatedAt     string         `json:"updatedAt"`
+}
+
+type StopResponse struct {
+	StopID    uint               `json:"stop_id"`
+	Name      string             `json:"name"`
+	Sequence  int                `json:"sequence"`
+	Schedules []ScheduleResponse `json:"schedules"` // Nested Schedules within StopResponse
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+}
+
+type ScheduleResponse struct {
+	ScheduleID    uint      `json:"schedule_id"`
+	ArrivalTime   time.Time `json:"arrival_time"`
+	DepartureTime time.Time `json:"departure_time"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+// UpdateBusServiceDatesDTO represents the data transfer object used for updating the service dates of a bus.
+type UpdateBusServiceDatesDTO struct {
+	LastServiceDate time.Time `json:"lastServiceDate" validate:"required"`
+	NextServiceDate time.Time `json:"nextServiceDate" validate:"required,gtfield=LastServiceDate"`
 }

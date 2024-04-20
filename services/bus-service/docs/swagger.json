@@ -94,6 +94,52 @@
                 }
             }
         },
+        "/buses/status": {
+            "get": {
+                "description": "Retrieve a list of all buses with the specified status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "buses"
+                ],
+                "summary": "Get all buses by status",
+                "parameters": [
+                    {
+                        "enum": [
+                            "active",
+                            "maintenance",
+                            "decommissioned"
+                        ],
+                        "type": "string",
+                        "description": "status",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of all buses",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.BusResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid status",
+                        "schema": {
+                            "$ref": "#/definitions/handler.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/buses/{id}": {
             "get": {
                 "description": "Retrieve details of a specific bus by its ID.",
@@ -236,6 +282,53 @@
                     }
                 }
             }
+        },
+        "/buses/{id}/service-dates": {
+            "put": {
+                "description": "Update the last and next service dates for a specific bus.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "buses"
+                ],
+                "summary": "Update bus service dates",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Bus ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Service Dates",
+                        "name": "serviceDates",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBusServiceDatesDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bus service dates updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handler.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid bus ID or service dates",
+                        "schema": {
+                            "$ref": "#/definitions/handler.APIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -363,15 +456,27 @@
                 "status": {
                     "type": "string",
                     "enum": [
-                        "active",
-                        "inactive",
-                        "in_service",
-                        "out_of_service"
+                        "active"
                     ]
                 },
                 "year": {
                     "description": "Assuming year range from 1900 to 2100",
                     "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateBusServiceDatesDTO": {
+            "type": "object",
+            "required": [
+                "lastServiceDate",
+                "nextServiceDate"
+            ],
+            "properties": {
+                "lastServiceDate": {
+                    "type": "string"
+                },
+                "nextServiceDate": {
+                    "type": "string"
                 }
             }
         },
