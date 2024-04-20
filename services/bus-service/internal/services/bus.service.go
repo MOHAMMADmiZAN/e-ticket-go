@@ -1,18 +1,22 @@
 package services
 
 import (
+	"bus-service/internal/api/dto"
 	"bus-service/internal/models"
 	"bus-service/internal/repository"
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"gorm.io/gorm"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
-const (
-	routeServiceBaseURL   = "http://route-service"
+var (
 	bookingServiceBaseURL = "http://booking-service"
+	routeServiceBaseURL   = os.Getenv("ROUTE_SERVICE_BASE_URL")
 )
 
 type BusService struct {
@@ -27,44 +31,21 @@ func NewBusService(busRepo *repository.BusRepository) *BusService {
 	}
 }
 
-// RouteServiceResponse represents the response from the RouteService for an active check.
-type RouteServiceResponse struct {
-	Active bool `json:"active"`
-}
-
-// BookingServiceResponse represents the response from the BookingService for future bookings check.
-type BookingServiceResponse struct {
-	HasBookings bool `json:"hasBookings"`
-}
-
-func (service *BusService) isRouteActive(routeID uint) (bool, error) {
-	var response RouteServiceResponse
+func (service *BusService) getRoute(routeID uint) (*dto.RouteResponse, error) {
+	var route dto.RouteResponse
+	url := fmt.Sprintf("%s/%d", routeServiceBaseURL, routeID)
 	resp, err := service.restyClient.R().
-		SetResult(&response).
-		Get(fmt.Sprintf("%s/routes/%d/isActive", routeServiceBaseURL, routeID))
+		SetResult(&route).
+		Get(url)
 
 	if err != nil {
-		return false, err
+		return nil, err // Return error if the API call fails
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return false, fmt.Errorf("RouteService responded with status code: %d", resp.StatusCode())
+		return nil, fmt.Errorf("RouteService responded with status code: %d", resp.StatusCode())
 	}
-	return response.Active, nil
-}
 
-func (service *BusService) hasFutureBookings(busID uint) (bool, error) {
-	var response BookingServiceResponse
-	resp, err := service.restyClient.R().
-		SetResult(&response).
-		Get(fmt.Sprintf("%s/buses/%d/hasFutureBookings", bookingServiceBaseURL, busID))
-
-	if err != nil {
-		return false, err
-	}
-	if resp.StatusCode() != http.StatusOK {
-		return false, fmt.Errorf("BookingService responded with status code: %d", resp.StatusCode())
-	}
-	return response.HasBookings, nil
+	return &route, nil // Return the route if everything is okay
 }
 
 // GetAllBuses retrieves all buses.
@@ -87,37 +68,38 @@ func (service *BusService) GetBusByID(id uint) (*models.Bus, error) {
 
 // CreateBus adds a new bus to the system after validating the route.
 func (service *BusService) CreateBus(bus models.Bus) (*models.Bus, error) {
-	active, err := service.isRouteActive(bus.RouteID)
+	_, err := service.getRoute(bus.RouteID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify route status: %v", err)
+		return nil, fmt.Errorf("failed to verify route status: %v", err.Error())
 	}
-	if !active {
-		return nil, errors.New("cannot create bus on an inactive route")
+	// Check bus with the same LicensePlate
+	busWithLicensePlate, err := service.busRepo.GetBusByCodeOrLicensePlate(bus.BusCode, bus.LicensePlate)
+	if err != nil {
+		// check if the error is not found goORM NotFound error
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("failed to check for existing bus: %v", err)
+		} else {
+			log.Print(`err`, err)
+		}
+	}
+	if busWithLicensePlate != nil {
+		return nil, errors.New("bus with the same license plate Or same bus code already exists")
 	}
 	return service.busRepo.CreateBus(bus)
 }
 
 // UpdateBus updates the details of an existing bus.
 func (service *BusService) UpdateBus(bus models.Bus) (*models.Bus, error) {
-	active, err := service.isRouteActive(bus.RouteID)
+	_, err := service.getRoute(bus.RouteID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify route status: %v", err)
 	}
-	if !active {
-		return nil, errors.New("cannot update bus on an inactive route")
-	}
+
 	return service.busRepo.UpdateBus(bus)
 }
 
 // DeleteBus removes a bus from the system after checking for future bookings.
 func (service *BusService) DeleteBus(busID uint) error {
-	hasBookings, err := service.hasFutureBookings(busID)
-	if err != nil {
-		return fmt.Errorf("failed to check for future bookings: %v", err)
-	}
-	if hasBookings {
-		return errors.New("cannot delete a bus with future bookings")
-	}
 	return service.busRepo.DeleteBus(busID)
 }
 

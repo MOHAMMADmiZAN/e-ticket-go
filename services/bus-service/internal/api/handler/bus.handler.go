@@ -4,7 +4,9 @@ import (
 	"bus-service/internal/api/dto"
 	"bus-service/internal/models"
 	"bus-service/internal/services"
+	"bus-service/pkg"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -98,13 +100,20 @@ func (h *BusHandler) GetBusByID(c *gin.Context) {
 func (h *BusHandler) CreateBus(c *gin.Context) {
 	var createBusDTO dto.CreateBusDTO
 	if err := c.ShouldBindJSON(&createBusDTO); err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		//Format the validation errors for the response.
+		validationErrors := pkg.FormatValidationError(err, createBusDTO)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid request format",
+			"details": validationErrors,
+		})
+
 		return
 	}
 
 	// Additional custom validation if necessary
 	if err := dto.ValidateCreateBusDTO(createBusDTO); err != nil {
 		respondWithError(c, http.StatusBadRequest, err)
+		log.Print(`error:2 `, err)
 		return
 	}
 	bus := createBusDTO.ToModel()
@@ -130,23 +139,30 @@ func (h *BusHandler) CreateBus(c *gin.Context) {
 // @Failure 500 {object} APIResponse "Internal Server Error - Could not update bus"
 // @Router /buses/{id} [put]
 func (h *BusHandler) UpdateBus(c *gin.Context) {
-	bus, err := h.getBusFromIDParam(c)
+	exitingBus, err := h.getBusFromIDParam(c)
 	if err != nil {
 		respondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := c.ShouldBindJSON(&bus); err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+	var req dto.UpdateBusDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		//Format the validation errors for the response.
+		validationErrors := pkg.FormatValidationError(err, req)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid request format",
+			"details": validationErrors,
+		})
 		return
 	}
-
+	bus := req.ToModel(exitingBus)
 	updatedBus, err := h.busService.UpdateBus(*bus)
 	if err != nil {
 		respondWithError(c, http.StatusInternalServerError, err)
 		return
 	}
-	respondWithSuccess(c, http.StatusOK, updatedBus, "Bus updated successfully")
+
+	respondWithSuccess(c, http.StatusOK, dto.FromModel(*updatedBus), "Bus updated successfully")
 }
 
 // DeleteBus godoc
@@ -199,4 +215,75 @@ func (h *BusHandler) parseUintParam(c *gin.Context, paramName string) (uint, err
 		return 0, fmt.Errorf("invalid %s: %s", paramName, paramValue)
 	}
 	return uint(id), nil
+}
+
+// GetBusesByStatus retrieves all buses by their operational status using a query parameter.
+// @Summary Get all buses by status
+// @Description Retrieve a list of all buses with the specified status.
+// @Tags buses
+// @Accept  json
+// @Produce  json
+// @Param status query string true "status" Enums(active, maintenance, decommissioned) "Bus operational status"
+// @Success 200 {array} dto.BusResponse "List of all buses"
+// @Failure 400 {object} APIResponse "Bad Request - Invalid status"
+// @Router /buses/status [get]
+func (h *BusHandler) GetBusesByStatus(c *gin.Context) {
+	// Retrieve the status from the query string
+	status := c.Query("status")
+	if status == "" {
+		respondWithError(c, http.StatusBadRequest, fmt.Errorf("missing status query parameter"))
+		return
+	}
+
+	buses, err := h.busService.GetBusesByStatus(status)
+	if err != nil {
+		respondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	busesResponse := make([]dto.BusResponse, 0, len(buses))
+	for _, bus := range buses {
+		busesResponse = append(busesResponse, dto.FromModel(bus))
+	}
+
+	respondWithSuccess(c, http.StatusOK, busesResponse, "")
+}
+
+// UpdateBusServiceDates godoc
+// @Summary Update bus service dates
+// @Description Update the last and next service dates for a specific bus.
+// @Tags buses
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Bus ID"
+// @Param serviceDates body dto.UpdateBusServiceDatesDTO true "Service Dates"
+// @Success 200 {object} APIResponse "Bus service dates updated successfully"
+// @Failure 400 {object} APIResponse "Bad Request - Invalid bus ID or service dates"
+// @Router /buses/{id}/service-dates [put]
+func (h *BusHandler) UpdateBusServiceDates(c *gin.Context) {
+	var req dto.UpdateBusServiceDatesDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		//Format the validation errors for the response.
+		validationErrors := pkg.FormatValidationError(err, req)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid request format",
+			"details": validationErrors,
+		})
+		return
+	}
+
+	// Extracting bus ID from the path parameter
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		respondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.busService.UpdateBusServiceDates(uint(id), req.LastServiceDate, req.NextServiceDate); err != nil {
+
+		respondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Bus service dates updated successfully"})
 }

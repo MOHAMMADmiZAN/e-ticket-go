@@ -88,6 +88,8 @@ func (s *Server) setupBusRoutes(v1 *gin.RouterGroup, b *handler.BusHandler) {
 		busGroup.GET("/:id", b.GetBusByID)
 		busGroup.PUT("/:id", b.UpdateBus)
 		busGroup.DELETE("/:id", b.DeleteBus)
+		busGroup.GET("/status", b.GetBusesByStatus)
+		busGroup.PUT("/:id/service-dates", b.UpdateBusServiceDates)
 	}
 
 }

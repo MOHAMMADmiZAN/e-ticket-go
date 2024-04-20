@@ -89,13 +89,20 @@ definitions:
       status:
         enum:
         - active
-        - inactive
-        - in_service
-        - out_of_service
         type: string
       year:
         description: Assuming year range from 1900 to 2100
         type: integer
+    type: object
+  dto.UpdateBusServiceDatesDTO:
+    properties:
+      lastServiceDate:
+        type: string
+      nextServiceDate:
+        type: string
+    required:
+    - lastServiceDate
+    - nextServiceDate
     type: object
   handler.APIResponse:
     properties:
@@ -265,6 +272,68 @@ paths:
           schema:
             $ref: '#/definitions/handler.APIResponse'
       summary: Update bus details
+      tags:
+      - buses
+  /buses/{id}/service-dates:
+    put:
+      consumes:
+      - application/json
+      description: Update the last and next service dates for a specific bus.
+      parameters:
+      - description: Bus ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service Dates
+        in: body
+        name: serviceDates
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBusServiceDatesDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bus service dates updated successfully
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+        "400":
+          description: Bad Request - Invalid bus ID or service dates
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Update bus service dates
+      tags:
+      - buses
+  /buses/status:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all buses with the specified status.
+      parameters:
+      - description: status
+        enum:
+        - active
+        - maintenance
+        - decommissioned
+        in: query
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all buses
+          schema:
+            items:
+              $ref: '#/definitions/dto.BusResponse'
+            type: array
+        "400":
+          description: Bad Request - Invalid status
+          schema:
+            $ref: '#/definitions/handler.APIResponse'
+      summary: Get all buses by status
       tags:
       - buses
 swagger: "2.0"
