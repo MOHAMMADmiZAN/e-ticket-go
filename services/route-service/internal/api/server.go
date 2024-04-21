@@ -49,7 +49,7 @@ func (s *Server) routes() {
 	sch := handler.NewScheduleHandler(services.NewScheduleService(repository.NewScheduleRepository(s.DB.Conn), 5*time.Minute))
 
 	// API Versioning
-	v1 := s.Router.Group("/api/v1")
+	v1 := s.Router.Group("/api/v1/routes")
 
 	// Health check route
 	s.setupHealthCheckRoute()
@@ -88,14 +88,14 @@ func (s *Server) setupNoRouteHandler() {
 }
 
 func (s *Server) setupRouteHandlers(v1 *gin.RouterGroup, rh *handler.RouteHandler) {
-	routesGroup := v1.Group("/routes")
+	routesGroup := v1.Group("/")
 	// Route handlers
 	{
 		routesGroup.POST("/", rh.CreateRoute)
 		routesGroup.GET("/", rh.GetAllRoutes)
-		routesGroup.GET("/:id", rh.GetRouteByID)
-		routesGroup.PUT("/:id", rh.UpdateRoute)
-		routesGroup.DELETE("/:id", rh.DeleteRoute)
+		routesGroup.GET("/:routeId", rh.GetRouteByID)
+		routesGroup.PUT("/:routeId", rh.UpdateRoute)
+		routesGroup.DELETE("/:routeId", rh.DeleteRoute)
 	}
 }
 

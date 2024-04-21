@@ -9,6 +9,7 @@ import (
 )
 
 type Bus struct {
+	gorm.Model
 	ID              uint      `gorm:"primaryKey"`
 	RouteID         uint      `gorm:"not null;index"` // Assume validation through RouteService
 	BusCode         string    `gorm:"type:varchar(100);not null;uniqueIndex"`
@@ -19,6 +20,7 @@ type Bus struct {
 	Status          string    `gorm:"type:varchar(50);not null;default:'active'"`
 	LastServiceDate time.Time `gorm:"not null"`
 	NextServiceDate time.Time `gorm:"not null"`
+	Seats           []Seat    `gorm:"foreignKey:BusID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"` // One-to-many relationship with Seats
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt `gorm:"index"`

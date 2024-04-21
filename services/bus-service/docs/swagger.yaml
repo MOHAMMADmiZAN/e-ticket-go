@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /api/v1/buses
 definitions:
   dto.BusResponse:
     properties:
@@ -49,9 +49,8 @@ definitions:
       status:
         enum:
         - active
-        - inactive
-        - in_service
-        - out_of_service
+        - maintenance
+        - decommissioned
         type: string
       year:
         description: Assuming year range from 1900 to 2100
@@ -66,6 +65,49 @@ definitions:
     - routeId
     - status
     - year
+    type: object
+  dto.CreateSeatRequest:
+    properties:
+      bus_id:
+        type: integer
+      class_type:
+        allOf:
+        - $ref: '#/definitions/models.SeatClassType'
+        enum:
+        - Regular
+        - Business
+      is_available:
+        description: Optional, defaults to true if not specified.
+        type: boolean
+      seat_number:
+        type: string
+      seat_status:
+        allOf:
+        - $ref: '#/definitions/models.SeatStatus'
+        enum:
+        - Booked
+        - Available
+        - Reserved
+    required:
+    - bus_id
+    - class_type
+    - seat_number
+    - seat_status
+    type: object
+  dto.SeatResponse:
+    properties:
+      bus_id:
+        type: integer
+      class_type:
+        $ref: '#/definitions/models.SeatClassType'
+      id:
+        type: integer
+      is_available:
+        type: boolean
+      seat_number:
+        type: string
+      seat_status:
+        $ref: '#/definitions/models.SeatStatus'
     type: object
   dto.UpdateBusDTO:
     properties:
@@ -89,6 +131,8 @@ definitions:
       status:
         enum:
         - active
+        - maintenance
+        - decommissioned
         type: string
       year:
         description: Assuming year range from 1900 to 2100
@@ -104,7 +148,50 @@ definitions:
     - lastServiceDate
     - nextServiceDate
     type: object
-  handler.APIResponse:
+  dto.UpdateSeatRequest:
+    properties:
+      bus_id:
+        description: Use pointers to differentiate between zero value and omitted
+          field.
+        type: integer
+      class_type:
+        allOf:
+        - $ref: '#/definitions/models.SeatClassType'
+        enum:
+        - Regular
+        - Business
+      is_available:
+        description: Optional, can be omitted.
+        type: boolean
+      seat_number:
+        type: string
+      seat_status:
+        allOf:
+        - $ref: '#/definitions/models.SeatStatus'
+        enum:
+        - Booked
+        - Available
+        - Reserved
+    type: object
+  models.SeatClassType:
+    enum:
+    - Regular
+    - Business
+    type: string
+    x-enum-varnames:
+    - ClassRegular
+    - ClassBusiness
+  models.SeatStatus:
+    enum:
+    - Booked
+    - Available
+    - Reserved
+    type: string
+    x-enum-varnames:
+    - StatusBooked
+    - StatusAvailable
+    - StatusReserved
+  pkg.APIResponse:
     properties:
       data: {}
       error:
@@ -129,7 +216,7 @@ info:
   title: My Bus Service API
   version: "1.0"
 paths:
-  /buses:
+  /:
     get:
       consumes:
       - application/json
@@ -146,7 +233,7 @@ paths:
         "500":
           description: Internal Server Error - Could not retrieve buses
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Get all buses
       tags:
       - buses
@@ -171,21 +258,84 @@ paths:
         "400":
           description: Bad Request - Invalid input provided
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "500":
           description: Internal Server Error - Unable to create bus
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Create a new bus
       tags:
       - buses
-  /buses/{id}:
+  /{busID}/seats/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the seat inventory for a specific bus
+      parameters:
+      - description: Bus ID
+        in: path
+        name: busID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of Seat objects
+          schema:
+            items:
+              $ref: '#/definitions/dto.SeatResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+    post:
+      consumes:
+      - application/json
+      description: Adds a new seat to a specific bus
+      parameters:
+      - description: Bus ID
+        in: path
+        name: busID
+        required: true
+        type: integer
+      - description: Seat Data
+        in: body
+        name: seat
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSeatRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created seat
+          schema:
+            $ref: '#/definitions/dto.SeatResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+  /{busID}/seats/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete the bus with the specified ID.
+      description: Removes a seat from the system
       parameters:
-      - description: Bus ID
+      - description: Seat ID
         in: path
         name: id
         required: true
@@ -194,21 +344,209 @@ paths:
       - application/json
       responses:
         "200":
+          description: Successfully deleted seat
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+    get:
+      consumes:
+      - application/json
+      description: Retrieves details of a specific seat
+      parameters:
+      - description: Seat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved seat
+          schema:
+            $ref: '#/definitions/dto.SeatResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+    put:
+      consumes:
+      - application/json
+      description: Updates the details or status of a specific seat
+      parameters:
+      - description: Seat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Seat update data
+        in: body
+        name: seat
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSeatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated seat
+          schema:
+            $ref: '#/definitions/dto.SeatResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+  /{busID}/seats/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Updates the status of a seat (booked, available, reserved)
+      parameters:
+      - description: Seat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Seat status data
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSeatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated seat status
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+  /{busID}/seats/availability:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all seats that are currently available
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of available seats
+          schema:
+            items:
+              $ref: '#/definitions/dto.SeatResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+  /{busID}/seats/status/{status}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all seats with a specific status
+      parameters:
+      - description: Seat Status
+        enum:
+        - booked
+        - available
+        - reserved
+        in: path
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of seats with the specified status
+          schema:
+            items:
+              $ref: '#/definitions/dto.SeatResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      tags:
+      - seats
+  /{busId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the bus with the specified ID.
+      parameters:
+      - description: Bus ID
+        in: path
+        name: busId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
           description: Bus deleted successfully
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "400":
           description: Bad Request - Invalid bus ID
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "404":
           description: Not Found - Bus not found
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "500":
           description: Internal Server Error - Unable to delete bus
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Delete a bus
       tags:
       - buses
@@ -219,7 +557,7 @@ paths:
       parameters:
       - description: Bus ID
         in: path
-        name: id
+        name: busId
         required: true
         type: integer
       produces:
@@ -232,7 +570,7 @@ paths:
         "400":
           description: Bad Request - Invalid ID format or Bus not found
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Get bus by ID
       tags:
       - buses
@@ -243,7 +581,7 @@ paths:
       parameters:
       - description: Bus ID
         in: path
-        name: id
+        name: busId
         required: true
         type: integer
       - description: Bus Update Data
@@ -262,19 +600,19 @@ paths:
         "400":
           description: Bad Request - Invalid ID or update data format
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "404":
           description: Not Found - Bus not found
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "500":
           description: Internal Server Error - Could not update bus
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Update bus details
       tags:
       - buses
-  /buses/{id}/service-dates:
+  /{busId}/service-dates:
     put:
       consumes:
       - application/json
@@ -282,7 +620,7 @@ paths:
       parameters:
       - description: Bus ID
         in: path
-        name: id
+        name: busId
         required: true
         type: integer
       - description: Service Dates
@@ -297,15 +635,15 @@ paths:
         "200":
           description: Bus service dates updated successfully
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
         "400":
           description: Bad Request - Invalid bus ID or service dates
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Update bus service dates
       tags:
       - buses
-  /buses/status:
+  /status:
     get:
       consumes:
       - application/json
@@ -332,7 +670,7 @@ paths:
         "400":
           description: Bad Request - Invalid status
           schema:
-            $ref: '#/definitions/handler.APIResponse'
+            $ref: '#/definitions/pkg.APIResponse'
       summary: Get all buses by status
       tags:
       - buses

@@ -16,9 +16,9 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api/v1",
+    "basePath": "/api/v1/routes",
     "paths": {
-        "/routes": {
+        "/": {
             "get": {
                 "description": "Get a list of all routes available in the system",
                 "consumes": [
@@ -94,7 +94,7 @@
                 }
             }
         },
-        "/routes/{id}": {
+        "/{routeId}": {
             "get": {
                 "description": "Retrieve a route by its unique ID",
                 "consumes": [
@@ -111,7 +111,7 @@
                     {
                         "type": "integer",
                         "description": "Route ID",
-                        "name": "id",
+                        "name": "routeId",
                         "in": "path",
                         "required": true
                     }
@@ -160,7 +160,7 @@
                         "type": "integer",
                         "format": "uint",
                         "description": "Route ID",
-                        "name": "id",
+                        "name": "routeId",
                         "in": "path",
                         "required": true
                     },
@@ -211,7 +211,7 @@
                     {
                         "type": "integer",
                         "description": "Route ID",
-                        "name": "id",
+                        "name": "routeId",
                         "in": "path",
                         "required": true
                     }

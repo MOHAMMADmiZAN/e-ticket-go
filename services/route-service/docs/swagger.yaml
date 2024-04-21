@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /api/v1/routes
 definitions:
   dto.AddScheduleRequest:
     properties:
@@ -176,6 +176,150 @@ info:
   title: My Route Service API
   version: "1.0"
 paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all routes available in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all routes
+          schema:
+            items:
+              $ref: '#/definitions/dto.RouteInfo'
+            type: array
+        "500":
+          description: Unable to retrieve routes
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      summary: Retrieve all routes
+      tags:
+      - routes
+    post:
+      consumes:
+      - application/json
+      description: Create a new route with the specified details.
+      parameters:
+      - description: Create Route Request
+        in: body
+        name: route
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RouteCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created route information
+          schema:
+            $ref: '#/definitions/dto.RouteInfo'
+        "404":
+          description: Route not found
+          schema:
+            type: string
+        "500":
+          description: Unable to create route
+          schema:
+            type: string
+      summary: Add a new route
+      tags:
+      - routes
+  /{routeId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a route by its unique ID
+      parameters:
+      - description: Route ID
+        in: path
+        name: routeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Route successfully deleted
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Unable to delete route
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      summary: Delete a route
+      tags:
+      - routes
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a route by its unique ID
+      parameters:
+      - description: Route ID
+        in: path
+        name: routeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved route
+          schema:
+            $ref: '#/definitions/dto.RouteResponse'
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Unable to retrieve route
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      summary: Get route by ID
+      tags:
+      - routes
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing route by its ID.
+      parameters:
+      - description: Route ID
+        format: uint
+        in: path
+        name: routeId
+        required: true
+        type: integer
+      - description: Route Update Information
+        in: body
+        name: route
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RouteUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated route information
+          schema:
+            $ref: '#/definitions/dto.RouteInfo'
+        "400":
+          description: Invalid route ID or request format
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal Server Error - Unable to update route
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      summary: Update a route
+      tags:
+      - routes
   /{routeId}/schedules:
     get:
       consumes:
@@ -560,148 +704,4 @@ paths:
             $ref: '#/definitions/pkg.ErrorMessage'
       tags:
       - Stops
-  /routes:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of all routes available in the system
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of all routes
-          schema:
-            items:
-              $ref: '#/definitions/dto.RouteInfo'
-            type: array
-        "500":
-          description: Unable to retrieve routes
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      summary: Retrieve all routes
-      tags:
-      - routes
-    post:
-      consumes:
-      - application/json
-      description: Create a new route with the specified details.
-      parameters:
-      - description: Create Route Request
-        in: body
-        name: route
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RouteCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Successfully created route information
-          schema:
-            $ref: '#/definitions/dto.RouteInfo'
-        "404":
-          description: Route not found
-          schema:
-            type: string
-        "500":
-          description: Unable to create route
-          schema:
-            type: string
-      summary: Add a new route
-      tags:
-      - routes
-  /routes/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a route by its unique ID
-      parameters:
-      - description: Route ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: Route successfully deleted
-        "400":
-          description: Invalid route ID
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "500":
-          description: Unable to delete route
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      summary: Delete a route
-      tags:
-      - routes
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a route by its unique ID
-      parameters:
-      - description: Route ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved route
-          schema:
-            $ref: '#/definitions/dto.RouteResponse'
-        "400":
-          description: Invalid route ID
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "404":
-          description: Route not found
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "500":
-          description: Unable to retrieve route
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      summary: Get route by ID
-      tags:
-      - routes
-    put:
-      consumes:
-      - application/json
-      description: Update the details of an existing route by its ID.
-      parameters:
-      - description: Route ID
-        format: uint
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Route Update Information
-        in: body
-        name: route
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RouteUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated route information
-          schema:
-            $ref: '#/definitions/dto.RouteInfo'
-        "400":
-          description: Invalid route ID or request format
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "500":
-          description: Internal Server Error - Unable to update route
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      summary: Update a route
-      tags:
-      - routes
 swagger: "2.0"

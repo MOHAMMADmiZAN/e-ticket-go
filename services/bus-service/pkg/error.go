@@ -40,6 +40,24 @@ func FormatValidationError(err error, dtoType interface{}) []ValidationError {
 			})
 			continue
 		}
+		if fieldName == "class_type" && fe.ActualTag() == "oneof" {
+			log.Print("class_type validation error")
+			errors = append(errors, ValidationError{
+				Field:   fieldName,
+				Message: "class_type must be one of 'Regular', 'Business'",
+			})
+			continue
+
+		}
+		if fieldName == "seat_status" && fe.ActualTag() == "oneof" {
+			log.Print("seat_status validation error")
+			errors = append(errors, ValidationError{
+				Field:   fieldName,
+				Message: "seat_status must be one of 'Booked', 'Available','Reserved'",
+			})
+			continue
+
+		}
 
 		errors = append(errors, ValidationError{
 			Field:   fieldName,

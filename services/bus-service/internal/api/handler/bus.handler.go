@@ -6,11 +6,10 @@ import (
 	"bus-service/internal/services"
 	"bus-service/pkg"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 type BusHandler struct {
@@ -21,28 +20,6 @@ func NewBusHandler(busService *services.BusService) *BusHandler {
 	return &BusHandler{busService: busService}
 }
 
-// APIResponse represents a standard API response structure.
-type APIResponse struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
-}
-
-// respondWithError handles error responses with a standard format.
-func respondWithError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, APIResponse{Success: false, Error: err.Error()})
-}
-
-// respondWithSuccess handles success responses with a standard format.
-func respondWithSuccess(c *gin.Context, statusCode int, data interface{}, message string) {
-	response := APIResponse{Success: true, Data: data}
-	if message != "" {
-		response.Message = message
-	}
-	c.JSON(statusCode, response)
-}
-
 // GetAllBuses godoc
 // @Summary Get all buses
 // @Description Retrieve a list of all buses from the bus service.
@@ -50,12 +27,13 @@ func respondWithSuccess(c *gin.Context, statusCode int, data interface{}, messag
 // @Accept  json
 // @Produce  json
 // @Success 200 {array} dto.BusResponse "List of all buses"
-// @Failure 500 {object} APIResponse "Internal Server Error - Could not retrieve buses"
-// @Router /buses [get]
+// @Failure 500 {object} pkg.APIResponse "Internal Server Error - Could not retrieve buses"
+//
+//	@Router / [get]
 func (h *BusHandler) GetAllBuses(c *gin.Context) {
 	buses, err := h.busService.GetAllBuses()
 	if err != nil {
-		respondWithError(c, http.StatusInternalServerError, err)
+		pkg.RespondWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 	busesResponse := make([]dto.BusResponse, 0, len(buses))
@@ -63,7 +41,7 @@ func (h *BusHandler) GetAllBuses(c *gin.Context) {
 		busesResponse = append(busesResponse, dto.FromModel(bus))
 
 	}
-	respondWithSuccess(c, http.StatusOK, busesResponse, "")
+	pkg.RespondWithSuccess(c, http.StatusOK, busesResponse, "")
 }
 
 // GetBusByID godoc
@@ -72,18 +50,21 @@ func (h *BusHandler) GetAllBuses(c *gin.Context) {
 // @Tags buses
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Bus ID"
+//
+//	@Param busId path int true "Bus ID"
+//
 // @Success 200 {object} dto.BusResponse "Successfully retrieved bus"
-// @Failure 400 {object} APIResponse "Bad Request - Invalid ID format or Bus not found"
-// @Router /buses/{id} [get]
+// @Failure 400 {object} pkg.APIResponse "Bad Request - Invalid ID format or Bus not found"
+//
+//	@Router /{busId} [get]
 func (h *BusHandler) GetBusByID(c *gin.Context) {
 	bus, err := h.getBusFromIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	respondWithSuccess(c, http.StatusOK, dto.FromModel(*bus), "")
+	pkg.RespondWithSuccess(c, http.StatusOK, dto.FromModel(*bus), "")
 }
 
 // CreateBus
@@ -94,9 +75,10 @@ func (h *BusHandler) GetBusByID(c *gin.Context) {
 // @Produce json
 // @Param bus body dto.CreateBusDTO true "Bus Creation Data"
 // @Success 201 {object} dto.BusResponse "Successfully created bus"
-// @Failure 400 {object} APIResponse  "Bad Request - Invalid input provided"
-// @Failure 500 {object} APIResponse "Internal Server Error - Unable to create bus"
-// @Router /buses [post]
+// @Failure 400 {object} pkg.APIResponse  "Bad Request - Invalid input provided"
+// @Failure 500 {object} pkg.APIResponse "Internal Server Error - Unable to create bus"
+//
+//	@Router / [post]
 func (h *BusHandler) CreateBus(c *gin.Context) {
 	var createBusDTO dto.CreateBusDTO
 	if err := c.ShouldBindJSON(&createBusDTO); err != nil {
@@ -112,17 +94,17 @@ func (h *BusHandler) CreateBus(c *gin.Context) {
 
 	// Additional custom validation if necessary
 	if err := dto.ValidateCreateBusDTO(createBusDTO); err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		log.Print(`error:2 `, err)
 		return
 	}
 	bus := createBusDTO.ToModel()
 	newBus, err := h.busService.CreateBus(bus)
 	if err != nil {
-		respondWithError(c, http.StatusInternalServerError, err)
+		pkg.RespondWithError(c, http.StatusInternalServerError, err)
 		return
 	}
-	respondWithSuccess(c, http.StatusCreated, newBus, "Bus created successfully")
+	pkg.RespondWithSuccess(c, http.StatusCreated, newBus, "Bus created successfully")
 }
 
 // UpdateBus godoc
@@ -131,17 +113,20 @@ func (h *BusHandler) CreateBus(c *gin.Context) {
 // @Tags buses
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Bus ID"
+//
+//	@Param busId path int true "Bus ID"
+//
 // @Param bus body dto.UpdateBusDTO true "Bus Update Data"
 // @Success 200 {object} dto.BusResponse "Bus updated successfully"
-// @Failure 400 {object} APIResponse "Bad Request - Invalid ID or update data format"
-// @Failure 404 {object} APIResponse "Not Found - Bus not found"
-// @Failure 500 {object} APIResponse "Internal Server Error - Could not update bus"
-// @Router /buses/{id} [put]
+// @Failure 400 {object} pkg.APIResponse "Bad Request - Invalid ID or update data format"
+// @Failure 404 {object} pkg.APIResponse "Not Found - Bus not found"
+// @Failure 500 {object} pkg.APIResponse "Internal Server Error - Could not update bus"
+//
+//	@Router /{busId} [put]
 func (h *BusHandler) UpdateBus(c *gin.Context) {
 	exitingBus, err := h.getBusFromIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -158,11 +143,11 @@ func (h *BusHandler) UpdateBus(c *gin.Context) {
 	bus := req.ToModel(exitingBus)
 	updatedBus, err := h.busService.UpdateBus(*bus)
 	if err != nil {
-		respondWithError(c, http.StatusInternalServerError, err)
+		pkg.RespondWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	respondWithSuccess(c, http.StatusOK, dto.FromModel(*updatedBus), "Bus updated successfully")
+	pkg.RespondWithSuccess(c, http.StatusOK, dto.FromModel(*updatedBus), "Bus updated successfully")
 }
 
 // DeleteBus godoc
@@ -171,30 +156,33 @@ func (h *BusHandler) UpdateBus(c *gin.Context) {
 // @Tags buses
 // @Accept json
 // @Produce json
-// @Param id path int true "Bus ID"
-// @Success 200 {object} APIResponse "Bus deleted successfully"
-// @Failure 400 {object} APIResponse "Bad Request - Invalid bus ID"
-// @Failure 404 {object} APIResponse "Not Found - Bus not found"
-// @Failure 500 {object} APIResponse "Internal Server Error - Unable to delete bus"
-// @Router /buses/{id} [delete]
+//
+//	@Param busId path int true "Bus ID"
+//
+// @Success 200 {object} pkg.APIResponse "Bus deleted successfully"
+// @Failure 400 {object} pkg.APIResponse "Bad Request - Invalid bus ID"
+// @Failure 404 {object} pkg.APIResponse "Not Found - Bus not found"
+// @Failure 500 {object} pkg.APIResponse "Internal Server Error - Unable to delete bus"
+//
+//	@Router /{busId} [delete]
 func (h *BusHandler) DeleteBus(c *gin.Context) {
 	bus, err := h.getBusFromIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err = h.busService.DeleteBus(bus.ID)
 	if err != nil {
-		respondWithError(c, http.StatusInternalServerError, err)
+		pkg.RespondWithError(c, http.StatusInternalServerError, err)
 		return
 	}
-	respondWithSuccess(c, http.StatusOK, nil, "Bus deleted successfully")
+	pkg.RespondWithSuccess(c, http.StatusOK, nil, "Bus deleted successfully")
 }
 
 // getBusFromIDParam is a helper method to retrieve the bus by ID from the URL parameter.
 func (h *BusHandler) getBusFromIDParam(c *gin.Context) (*models.Bus, error) {
-	id, err := h.parseUintParam(c, "id")
+	id, err := h.parseUintParam(c, "busId")
 	if err != nil {
 		return nil, err
 	}
@@ -225,19 +213,20 @@ func (h *BusHandler) parseUintParam(c *gin.Context, paramName string) (uint, err
 // @Produce  json
 // @Param status query string true "status" Enums(active, maintenance, decommissioned) "Bus operational status"
 // @Success 200 {array} dto.BusResponse "List of all buses"
-// @Failure 400 {object} APIResponse "Bad Request - Invalid status"
-// @Router /buses/status [get]
+// @Failure 400 {object} pkg.APIResponse "Bad Request - Invalid status"
+//
+//	@Router /status [get]
 func (h *BusHandler) GetBusesByStatus(c *gin.Context) {
 	// Retrieve the status from the query string
 	status := c.Query("status")
 	if status == "" {
-		respondWithError(c, http.StatusBadRequest, fmt.Errorf("missing status query parameter"))
+		pkg.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("missing status query parameter"))
 		return
 	}
 
 	buses, err := h.busService.GetBusesByStatus(status)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -246,7 +235,7 @@ func (h *BusHandler) GetBusesByStatus(c *gin.Context) {
 		busesResponse = append(busesResponse, dto.FromModel(bus))
 	}
 
-	respondWithSuccess(c, http.StatusOK, busesResponse, "")
+	pkg.RespondWithSuccess(c, http.StatusOK, busesResponse, "")
 }
 
 // UpdateBusServiceDates godoc
@@ -255,11 +244,14 @@ func (h *BusHandler) GetBusesByStatus(c *gin.Context) {
 // @Tags buses
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Bus ID"
+//
+//	@Param busId path int true "Bus ID"
+//
 // @Param serviceDates body dto.UpdateBusServiceDatesDTO true "Service Dates"
-// @Success 200 {object} APIResponse "Bus service dates updated successfully"
-// @Failure 400 {object} APIResponse "Bad Request - Invalid bus ID or service dates"
-// @Router /buses/{id}/service-dates [put]
+// @Success 200 {object} pkg.APIResponse "Bus service dates updated successfully"
+// @Failure 400 {object} pkg.APIResponse "Bad Request - Invalid bus ID or service dates"
+//
+//	@Router /{busId}/service-dates [put]
 func (h *BusHandler) UpdateBusServiceDates(c *gin.Context) {
 	var req dto.UpdateBusServiceDatesDTO
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -275,13 +267,13 @@ func (h *BusHandler) UpdateBusServiceDates(c *gin.Context) {
 	// Extracting bus ID from the path parameter
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.busService.UpdateBusServiceDates(uint(id), req.LastServiceDate, req.NextServiceDate); err != nil {
 
-		respondWithError(c, http.StatusBadRequest, err)
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
