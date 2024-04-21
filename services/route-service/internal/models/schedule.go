@@ -8,6 +8,7 @@ import (
 // Schedule represents the timetable for a route at a specific stop.
 type Schedule struct {
 	gorm.Model
+	ID            uint      `gorm:"primaryKey autoIncrement"`
 	RouteID       uint      `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	StopID        uint      `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	ArrivalTime   time.Time `gorm:"not null"`

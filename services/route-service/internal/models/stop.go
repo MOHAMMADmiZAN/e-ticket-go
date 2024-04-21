@@ -7,6 +7,7 @@ import (
 // Stop represents a bus stop along a route.
 type Stop struct {
 	gorm.Model
+	ID       uint   `gorm:"primaryKey autoIncrement"`
 	RouteID  uint   `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name     string `gorm:"not null;type:varchar(100)"`
 	Sequence int    `gorm:"not null"`
