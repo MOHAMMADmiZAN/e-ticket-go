@@ -25,7 +25,6 @@ const (
 // Seat represents a seat on a bus, with ORM functionalities managed by GORM.
 type Seat struct {
 	gorm.Model
-	ID          uint          `gorm:"primaryKey;autoIncrement"`
 	BusID       uint          `gorm:"index;not null;constraint:OnDelete:CASCADE"`           // Foreign key referencing the buses table.
 	SeatNumber  string        `gorm:"size:255;not null;uniqueIndex:idx_seat_number_bus_id"` // Alphanumeric identifier for the seat, unique within the bus
 	ClassType   SeatClassType `gorm:"type:varchar(100);not null"`                           // Class type of the seat.

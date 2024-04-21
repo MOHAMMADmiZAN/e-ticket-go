@@ -26,7 +26,7 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Expose port 8080 for the application
-EXPOSE 8081
+EXPOSE 8082
 
 # Use the entrypoint script to decide what to run
 ENTRYPOINT ["/entrypoint.sh"]
