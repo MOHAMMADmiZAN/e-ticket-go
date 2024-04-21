@@ -10,7 +10,7 @@
 // @license.name    Apache License Version 2.0
 // @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host            localhost:8081
+// @host            localhost:8082
 // @BasePath        /api/v1/buses
 package main
 
