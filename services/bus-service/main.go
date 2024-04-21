@@ -11,7 +11,7 @@
 // @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host            localhost:8081
-// @BasePath        /api/v1
+// @BasePath        /api/v1/buses
 package main
 
 import (
@@ -29,7 +29,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading environment variables from system")
 	}
-	database := config.NewDatabase(&models.Bus{})
+	database := config.NewDatabase(&models.Bus{}, &models.Seat{})
 	defer database.Close()
 
 	// Get the port number from the environment variable.

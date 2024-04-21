@@ -46,13 +46,17 @@ func (s *Server) routes() {
 	b := handler.NewBusHandler(services.NewBusService(repository.NewBusRepository(s.DB.Conn)))
 
 	// API Versioning
-	v1 := s.Router.Group("/api/v1")
+	v1 := s.Router.Group("/api/v1/buses")
 
 	// Health check route
 	s.setupHealthCheckRoute()
 
 	// Setup bus handlers
 	s.setupBusRoutes(v1, b)
+
+	// Setup seat handlers
+	se := handler.NewSeatHandler(services.NewSeatService(repository.NewSeatRepository(s.DB.Conn)))
+	s.setupSeatRoutes(v1, se)
 
 	// Catch-all route for handling unmatched routes (404 Not Found)
 	s.setupNoRouteHandler()
@@ -81,15 +85,32 @@ func (s *Server) setupNoRouteHandler() {
 // setup Bus routes
 func (s *Server) setupBusRoutes(v1 *gin.RouterGroup, b *handler.BusHandler) {
 	//bus routes
-	busGroup := v1.Group("/buses")
+	busGroup := v1.Group("/")
 	{
 		busGroup.GET("/", b.GetAllBuses)
 		busGroup.POST("/", b.CreateBus)
-		busGroup.GET("/:id", b.GetBusByID)
-		busGroup.PUT("/:id", b.UpdateBus)
-		busGroup.DELETE("/:id", b.DeleteBus)
+		busGroup.GET("/:busID", b.GetBusByID)
+		busGroup.PUT("/:busID", b.UpdateBus)
+		busGroup.DELETE("/:busID", b.DeleteBus)
 		busGroup.GET("/status", b.GetBusesByStatus)
-		busGroup.PUT("/:id/service-dates", b.UpdateBusServiceDates)
+		busGroup.PUT("/:busID/service-dates", b.UpdateBusServiceDates)
+	}
+
+}
+
+// setup Seat routes
+func (s *Server) setupSeatRoutes(v1 *gin.RouterGroup, se *handler.SeatHandler) {
+	//seat routes
+	seatGroup := v1.Group("/:busID/seats/")
+	{
+		seatGroup.GET("/", se.GetSeatsByBus)
+		seatGroup.POST("/", se.CreateSeat)
+		seatGroup.GET("/:id", se.GetSeatByID)
+		seatGroup.PUT("/:id", se.UpdateSeat)
+		seatGroup.DELETE("/:id", se.DeleteSeat)
+		seatGroup.GET("/status/:status", se.GetSeatsByStatus)
+		seatGroup.PUT("/:id/status", se.UpdateSeatStatus)
+		seatGroup.GET("/availability", se.GetAvailableSeats)
 	}
 
 }

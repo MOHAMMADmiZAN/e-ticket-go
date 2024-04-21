@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/routes": {
+        "/": {
             "get": {
                 "description": "Get a list of all routes available in the system",
                 "consumes": [
@@ -100,7 +100,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/routes/{id}": {
+        "/{routeId}": {
             "get": {
                 "description": "Retrieve a route by its unique ID",
                 "consumes": [
@@ -117,7 +117,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Route ID",
-                        "name": "id",
+                        "name": "routeId",
                         "in": "path",
                         "required": true
                     }
@@ -166,7 +166,7 @@ const docTemplate = `{
                         "type": "integer",
                         "format": "uint",
                         "description": "Route ID",
-                        "name": "id",
+                        "name": "routeId",
                         "in": "path",
                         "required": true
                     },
@@ -217,7 +217,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Route ID",
-                        "name": "id",
+                        "name": "routeId",
                         "in": "path",
                         "required": true
                     }
@@ -1062,7 +1062,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/api/v1/routes",
 	Schemes:          []string{},
 	Title:            "My Route Service API",
 	Description:      "This API serves as an interface to interact with the My Route Service platform, providing endpoints for managing bus routes, bookings, and user interactions.",

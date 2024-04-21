@@ -34,7 +34,7 @@ func NewRouteHandler(routeService *services.RouteService) *RouteHandler {
 // @Success 201 {object} dto.RouteInfo "Successfully created route information"
 // @Failure 404 {string} string "Route not found"
 // @Failure 500 {string} string "Unable to create route"
-// @Router /routes [post]
+// @Router  / [post]
 func (h *RouteHandler) CreateRoute(c *gin.Context) {
 	var jsonRequest dto.RouteCreateRequest
 
@@ -86,7 +86,7 @@ func (h *RouteHandler) CreateRoute(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} dto.RouteInfo "List of all routes"
 // @Failure 500 {object} pkg.ErrorMessage "Unable to retrieve routes"
-// @Router /routes [get]
+// @Router  / [get]
 // GetAllRoutes handles GET requests to retrieve all routes.
 func (h *RouteHandler) GetAllRoutes(c *gin.Context) {
 	routes, err := h.routeService.GetRoutes(c)
@@ -104,15 +104,17 @@ func (h *RouteHandler) GetAllRoutes(c *gin.Context) {
 // @Tags routes
 // @Accept json
 // @Produce json
-// @Param id path int true "Route ID"
+//
+//	@Param routeId path int true "Route ID"
+//
 // @Success 200 {object} dto.RouteResponse "Successfully retrieved route"
 // @Failure 400 {object} pkg.ErrorMessage "Invalid route ID"
 // @Failure 404 {object} pkg.ErrorMessage "Route not found"
 // @Failure 500 {object} pkg.ErrorMessage "Unable to retrieve route"
-// @Router /routes/{id} [get]
+// @Router  /{routeId} [get]
 func (h *RouteHandler) GetRouteByID(c *gin.Context) {
 	// Extract and parse route ID from the request parameters
-	idParam := c.Param("id")
+	idParam := c.Param("routeId")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
 		// Log the error with the invalid ID for debugging
@@ -148,16 +150,18 @@ func (h *RouteHandler) GetRouteByID(c *gin.Context) {
 // @Tags routes
 // @Accept json
 // @Produce json
-// @Param id path int true "Route ID" Format(uint)
+//
+//	@Param routeId path int true "Route ID" Format(uint)
+//
 // @Param route body dto.RouteUpdateRequest true "Route Update Information"
 // @Success 200 {object} dto.RouteInfo "Successfully updated route information"
 // @Failure 400 {object} pkg.ErrorMessage "Invalid route ID or request format"
 // @Failure 500 {object} pkg.ErrorMessage "Internal Server Error - Unable to update route"
-// @Router /routes/{id} [put]
+// @Router  /{routeId} [put]
 func (h *RouteHandler) UpdateRoute(c *gin.Context) {
 
 	// Parse the route ID from the request URI
-	idParam := c.Param("id")
+	idParam := c.Param("routeId")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
 		// Log the error for debugging purposes
@@ -205,13 +209,15 @@ func (h *RouteHandler) UpdateRoute(c *gin.Context) {
 // @Tags routes
 // @Accept json
 // @Produce json
-// @Param id path int true "Route ID"
+//
+//	@Param routeId path int true "Route ID"
+//
 // @Success 204 "Route successfully deleted"
 // @Failure 400 {object} pkg.ErrorMessage "Invalid route ID"
 // @Failure 500 {object} pkg.ErrorMessage "Unable to delete route"
-// @Router /routes/{id} [delete]
+// @Router  /{routeId} [delete]
 func (h *RouteHandler) DeleteRoute(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id, err := strconv.ParseUint(c.Param("routeId"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Invalid route ID"))
 		return
