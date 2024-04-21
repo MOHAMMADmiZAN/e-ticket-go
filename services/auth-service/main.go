@@ -1,6 +1,7 @@
-// @title           My Bus Service API
+// @title           My Auth Service API
 // @version         1.0
-// @description     This API serves as an interface to interact with the My Bus Service platform, providing endpoints for managing bus routes, bookings, and user interactions.
+// @description     The My Auth Service API provides a secure and efficient means for handling authentication and authorization processes. By exposing endpoints for user registration, authentication, and account management, this API facilitates the establishment and maintenance of secure user sessions and the protection of user data. The API is meticulously designed to offer robust security features that align with industry best practices.
+
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name    Mohammad Mizan
@@ -12,11 +13,13 @@
 
 // @host            localhost:8083
 // @BasePath        /api/v1/auth
+
 package main
 
 import (
 	"auth-service/internal/api"
 	"auth-service/internal/config"
+	"auth-service/internal/models"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -28,7 +31,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading environment variables from system")
 	}
-	database := config.NewDatabase()
+	database := config.NewDatabase(&models.User{}, &models.LoginHistory{}, &models.UserVerification{})
 	defer database.Close()
 
 	// Get the port number from the environment variable.

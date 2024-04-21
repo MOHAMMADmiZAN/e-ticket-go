@@ -10,8 +10,8 @@ tmp_dir = "tmp"
 [build]
 poll = true
 # Command to build your application, output the binary to the tmp directory
-bin = "tmp/user-service"
-cmd = "go build -o ./tmp/user-service"
+bin = "tmp/profile-service"
+cmd = "go build -o ./tmp/profile-service"
 # Directory where the log file will be stored
 log = "build-errors.log"
 # Directories or glob patterns to include in the watch list

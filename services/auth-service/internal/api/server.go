@@ -1,11 +1,12 @@
 package api
 
 import (
-	//_ "auth-service/docs" // Required for Swagger docs
-
+	_ "auth-service/docs" // Required for Swagger docs
+	"auth-service/internal/api/handler"
 	"auth-service/internal/api/middleware"
 	"auth-service/internal/config"
-
+	"auth-service/internal/repository"
+	"auth-service/internal/services"
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,13 @@ func NewServer(databaseClient *config.Database) *Server {
 func (s *Server) routes() {
 
 	// API Versioning
-	//_ := s.Router.Group("/api/v1/auth")
+	v1 := s.Router.Group("/api/v1/auth")
+
+	// Setup user handlers
+	u := handler.NewUserHandler(services.NewUserService(repository.NewUserRepository(s.DB.Conn)))
+
+	// Setup user routes
+	s.setupUserRoutes(v1, u)
 
 	// Health check route
 	s.setupHealthCheckRoute()
@@ -70,6 +77,13 @@ func (s *Server) setupNoRouteHandler() {
 			"details": "Check the URL for errors or contact support if the problem persists.",
 		})
 	})
+}
+
+func (s *Server) setupUserRoutes(v1 *gin.RouterGroup, u *handler.UserHandler) {
+	v1.POST("/register", u.RegisterUser)
+	v1.POST("/login", u.AuthenticateUser)
+	v1.PUT("/users/:id/password", u.UpdateUserPassword)
+	v1.DELETE("/users/:id", u.DeleteUser)
 }
 
 // Start runs the HTTP server on a specific address.

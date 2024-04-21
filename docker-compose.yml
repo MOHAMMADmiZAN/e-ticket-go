@@ -95,18 +95,18 @@ services:
     restart: on-failure
     volumes:
       - ./services/auth-service:/app
-  user-service:
+  profile-service:
     build:
-      context: ./services/user-service
+      context: ./services/profile-service
       dockerfile: deployments/Dockerfile
       args:
         - ENV=${ENV}
     ports:
       - "8084:8084"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${USER_POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${PROFILE_POSTGRES_DB}
     env_file:
-      - ./services/user-service/.env
+      - ./services/profile-service/.env
     depends_on:
       db:
         condition: service_healthy
@@ -114,7 +114,8 @@ services:
       - backend-network
     restart: on-failure
     volumes:
-      - ./services/user-service:/app
+      - ./services/profile-service:/app
+
   booking-service:
     build:
       context: ./services/booking-service

@@ -1,4 +1,4 @@
-// @title           My Bus Service API
+// @title           My Profile Service API
 // @version         1.0
 // @description     This API serves as an interface to interact with the My Bus Service platform, providing endpoints for managing bus routes, bookings, and user interactions.
 // @termsOfService  http://swagger.io/terms/
@@ -11,16 +11,16 @@
 // @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host            localhost:8084
-// @BasePath        /api/v1/users
+// @BasePath        /api/v1/profiles
 package main
 
 import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"profile-service/internal/api"
+	"profile-service/internal/config"
 	"strconv"
-	"user-service/internal/api"
-	"user-service/internal/config"
 )
 
 func main() {

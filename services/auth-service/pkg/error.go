@@ -32,19 +32,19 @@ func FormatValidationError(err error, dtoType interface{}) []ValidationError {
 		if found && jsonTag == "" {
 			fieldName = field.Name
 		}
-		if fieldName == "status" && fe.ActualTag() == "oneof" {
-			log.Print("status validation error")
+		if fieldName == "role" && fe.ActualTag() == "oneof" {
+			log.Print("role validation error")
 			errors = append(errors, ValidationError{
 				Field:   fieldName,
-				Message: "status must be one of 'active', 'maintenance','decommissioned'",
+				Message: "role must be one of 'admin', 'customer'",
 			})
 			continue
 		}
-		if fieldName == "class_type" && fe.ActualTag() == "oneof" {
-			log.Print("class_type validation error")
+		if fieldName == "verificationStatus" && fe.ActualTag() == "oneof" {
+			log.Print("verificationStatus validation error")
 			errors = append(errors, ValidationError{
 				Field:   fieldName,
-				Message: "class_type must be one of 'Regular', 'Business'",
+				Message: "verificationStatus must be one of 'pending', 'verified', 'failed'",
 			})
 			continue
 

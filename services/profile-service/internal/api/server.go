@@ -1,10 +1,10 @@
 package api
 
 import (
-	//_ "user-service/docs" // Required for Swagger docs
+	//_ "profile-service/docs" // Required for Swagger docs
 
-	"user-service/internal/api/middleware"
-	"user-service/internal/config"
+	"profile-service/internal/api/middleware"
+	"profile-service/internal/config"
 
 	"context"
 	"errors"
@@ -54,7 +54,7 @@ func (s *Server) routes() {
 
 func (s *Server) setupHealthCheckRoute() {
 	s.Router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "User services is running"})
+		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "Profile services is running"})
 	})
 }
 
