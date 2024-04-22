@@ -70,6 +70,154 @@ const docTemplate = `{
                 }
             }
         },
+        "/login-attempts": {
+            "post": {
+                "description": "This endpoint records a login attempt for a user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "login-history"
+                ],
+                "summary": "Record login attempt",
+                "parameters": [
+                    {
+                        "description": "Create Login History Request",
+                        "name": "loginAttempt",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateLoginHistoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Login attempt recorded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid login attempt data",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/login-attempts/{userID}": {
+            "get": {
+                "description": "This endpoint fetches all login attempts for a specified user within a given time frame.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "login-history"
+                ],
+                "summary": "Get login attempts by user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start time (RFC3339 format)",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End time (RFC3339 format)",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login attempts fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/logout/{historyID}": {
+            "post": {
+                "description": "This endpoint records the logout time for a specific login history record.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "login-history"
+                ],
+                "summary": "Record user logout",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "History ID",
+                        "name": "historyID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logout recorded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid history ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "This endpoint registers a new user with the provided credentials.",
@@ -103,6 +251,50 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid user data",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/suspicious-activity/{userID}": {
+            "get": {
+                "description": "This endpoint checks for suspicious login activity for a specified user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "login-history"
+                ],
+                "summary": "Check for suspicious activity",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Suspicious activity status returned",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
                         "schema": {
                             "$ref": "#/definitions/pkg.APIResponse"
                         }
@@ -209,9 +401,216 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{userID}/verifications": {
+            "get": {
+                "description": "This endpoint retrieves all verification entries associated with a specified user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verification"
+                ],
+                "summary": "Get all verifications for a user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of verifications fetched successfully",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/pkg.APIResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/verifications": {
+            "post": {
+                "description": "This endpoint creates a user verification entry.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verification"
+                ],
+                "summary": "Create user verification",
+                "parameters": [
+                    {
+                        "description": "Create User Verification Request",
+                        "name": "verification",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUserVerificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Verification created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/verifications/{id}": {
+            "get": {
+                "description": "This endpoint retrieves the details of a specific verification.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verification"
+                ],
+                "summary": "Get verification details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Verification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Verification details retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid verification ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "This endpoint updates the status of an existing verification.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verification"
+                ],
+                "summary": "Update verification status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Verification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Verification Status Request",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserVerificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Verification status updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid verification ID or request data",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dto.CreateLoginHistoryRequest": {
+            "type": "object",
+            "required": [
+                "deviceInformation",
+                "ipAddress",
+                "userID"
+            ],
+            "properties": {
+                "deviceInformation": {
+                    "type": "string"
+                },
+                "failureReason": {
+                    "type": "string"
+                },
+                "ipAddress": {
+                    "type": "string"
+                },
+                "successful": {
+                    "type": "boolean"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -239,6 +638,40 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 3
+                }
+            }
+        },
+        "dto.CreateUserVerificationRequest": {
+            "type": "object",
+            "required": [
+                "userID",
+                "verificationType"
+            ],
+            "properties": {
+                "userID": {
+                    "type": "integer"
+                },
+                "verificationType": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateUserVerificationRequest": {
+            "type": "object",
+            "required": [
+                "verificationStatus"
+            ],
+            "properties": {
+                "verificationStatus": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "verified",
+                        "failed"
+                    ]
+                },
+                "verifiedAt": {
+                    "type": "string"
                 }
             }
         },

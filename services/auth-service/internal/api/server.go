@@ -52,6 +52,18 @@ func (s *Server) routes() {
 	// Setup user routes
 	s.setupUserRoutes(v1, u)
 
+	// Setup login history handlers
+	h := handler.NewLoginHistoryHandler(services.NewLoginHistoryService(repository.NewLoginHistoryRepository(s.DB.Conn)))
+
+	// Setup login history routes
+	s.setupLoginHistoryRoutes(v1, h)
+
+	// Setup user verification handlers
+	v := handler.NewUserVerificationHandler(services.NewUserVerificationService(repository.NewUserVerificationRepository(s.DB.Conn)))
+
+	// Setup user verification routes
+	s.setupUserVerificationRoutes(v1, v)
+
 	// Health check route
 	s.setupHealthCheckRoute()
 
@@ -84,6 +96,29 @@ func (s *Server) setupUserRoutes(v1 *gin.RouterGroup, u *handler.UserHandler) {
 	v1.POST("/login", u.AuthenticateUser)
 	v1.PUT("/users/:id/password", u.UpdateUserPassword)
 	v1.DELETE("/users/:id", u.DeleteUser)
+}
+
+func (s *Server) setupLoginHistoryRoutes(v1 *gin.RouterGroup, h *handler.LoginHistoryHandler) {
+	// Record a login attempt
+	v1.POST("/login-attempts", h.RecordLoginAttempt)
+
+	// Get login attempts for a specific user within a timeframe
+	v1.GET("/login-attempts/:userID", h.GetLoginAttemptsByUser)
+
+	// Record user logout
+	v1.PUT("/logout/:historyID", h.RecordUserLogout)
+
+	// Check for suspicious activity for a specific user
+	v1.GET("/suspicious-activity/:userID", h.CheckSuspiciousActivity)
+}
+
+// setup userVerification routes
+func (s *Server) setupUserVerificationRoutes(v1 *gin.RouterGroup, v *handler.UserVerificationHandler) {
+	v1.POST("/verifications", v.CreateVerification)
+	v1.PUT("/verifications/:id", v.UpdateVerificationStatus)
+	v1.GET("/verifications/:id", v.GetVerificationDetails)
+	v1.GET("/users/:userID/verifications", v.GetVerificationsByUserID)
+
 }
 
 // Start runs the HTTP server on a specific address.

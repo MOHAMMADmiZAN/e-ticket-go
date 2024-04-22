@@ -21,6 +21,7 @@ func (c *CreateUserRequest) ToUserModel() models.User {
 		Password:            string(hashedPassword),
 		Role:                c.Role,
 		AccountCreationDate: time.Now(),
+		Verified:            false,
 	}
 }
 
@@ -30,6 +31,7 @@ type UserResponse struct {
 	Email               string    `json:"email"`
 	Role                string    `json:"role"`
 	AccountCreationDate time.Time `json:"accountCreationDate"`
+	Verified            bool      `json:"verified"`
 }
 
 func FromUserModel(u models.User) UserResponse {
@@ -39,6 +41,7 @@ func FromUserModel(u models.User) UserResponse {
 		Email:               u.Email,
 		Role:                u.Role,
 		AccountCreationDate: u.AccountCreationDate,
+		Verified:            u.Verified,
 	}
 }
 
@@ -46,6 +49,7 @@ type UpdateUserRequest struct {
 	Email    string `json:"email" binding:"omitempty,email"`
 	Password string `json:"password" binding:"omitempty,min=6"`
 	Role     string `json:"role" binding:"omitempty,oneof=admin customer"`
+	Verified bool   `json:"verified" binding:"omitempty"`
 }
 
 func (u *UpdateUserRequest) ToUpdateUserModel() models.User {
