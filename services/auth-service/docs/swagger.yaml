@@ -1,5 +1,22 @@
 basePath: /api/v1/auth
 definitions:
+  dto.CreateLoginHistoryRequest:
+    properties:
+      deviceInformation:
+        type: string
+      failureReason:
+        type: string
+      ipAddress:
+        type: string
+      successful:
+        type: boolean
+      userID:
+        type: integer
+    required:
+    - deviceInformation
+    - ipAddress
+    - userID
+    type: object
   dto.CreateUserRequest:
     properties:
       email:
@@ -21,6 +38,29 @@ definitions:
     - password
     - role
     - username
+    type: object
+  dto.CreateUserVerificationRequest:
+    properties:
+      userID:
+        type: integer
+      verificationType:
+        type: string
+    required:
+    - userID
+    - verificationType
+    type: object
+  dto.UpdateUserVerificationRequest:
+    properties:
+      verificationStatus:
+        enum:
+        - pending
+        - verified
+        - failed
+        type: string
+      verifiedAt:
+        type: string
+    required:
+    - verificationStatus
     type: object
   dto.UserLoginDTO:
     properties:
@@ -107,6 +147,106 @@ paths:
       summary: Authenticate user
       tags:
       - auth
+  /login-attempts:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint records a login attempt for a user.
+      parameters:
+      - description: Create Login History Request
+        in: body
+        name: loginAttempt
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLoginHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Login attempt recorded successfully
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid login attempt data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Record login attempt
+      tags:
+      - login-history
+  /login-attempts/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint fetches all login attempts for a specified user within
+        a given time frame.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Start time (RFC3339 format)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login attempts fetched successfully
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get login attempts by user
+      tags:
+      - login-history
+  /logout/{historyID}:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint records the logout time for a specific login history
+        record.
+      parameters:
+      - description: History ID
+        in: path
+        name: historyID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout recorded successfully
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid history ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Record user logout
+      tags:
+      - login-history
   /register:
     post:
       consumes:
@@ -137,6 +277,36 @@ paths:
       summary: Register new user
       tags:
       - auth
+  /suspicious-activity/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint checks for suspicious login activity for a specified
+        user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Suspicious activity status returned
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Check for suspicious activity
+      tags:
+      - login-history
   /users/{id}:
     delete:
       description: This endpoint deletes a user with the specified ID.
@@ -200,4 +370,125 @@ paths:
       summary: Update user password
       tags:
       - users
+  /users/{userID}/verifications:
+    get:
+      description: This endpoint retrieves all verification entries associated with
+        a specified user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of verifications fetched successfully
+          schema:
+            items:
+              $ref: '#/definitions/pkg.APIResponse'
+            type: array
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get all verifications for a user
+      tags:
+      - verification
+  /verifications:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint creates a user verification entry.
+      parameters:
+      - description: Create User Verification Request
+        in: body
+        name: verification
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Verification created successfully
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Create user verification
+      tags:
+      - verification
+  /verifications/{id}:
+    get:
+      description: This endpoint retrieves the details of a specific verification.
+      parameters:
+      - description: Verification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verification details retrieved successfully
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid verification ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get verification details
+      tags:
+      - verification
+    put:
+      consumes:
+      - application/json
+      description: This endpoint updates the status of an existing verification.
+      parameters:
+      - description: Verification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Verification Status Request
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verification status updated successfully
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "400":
+          description: Invalid verification ID or request data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Update verification status
+      tags:
+      - verification
 swagger: "2.0"

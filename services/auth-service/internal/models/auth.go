@@ -12,9 +12,10 @@ type User struct {
 	Email               string             `gorm:"uniqueIndex;size:255" json:"email"`    // Unique email
 	Password            string             `json:"password"`
 	Role                string             `json:"role"` // User role
+	Verified            bool               `json:"verified"`
 	AccountCreationDate time.Time          `json:"accountCreationDate"`
-	UserVerifications   []UserVerification `json:"userVerifications"` // One-to-Many relationship
-	LoginHistories      []LoginHistory     `json:"loginHistories"`    // One-to-Many relationship
+	UserVerifications   []UserVerification `gorm:"constraint:OnDelete:CASCADE;" json:"userVerifications"` // One-to-Many relationship with cascade delete
+	LoginHistories      []LoginHistory     `gorm:"constraint:OnDelete:CASCADE;" json:"loginHistories"`    // One-to-Many relationship with cascade delete
 }
 
 // TableName overrides the table name used by User to `users`.
