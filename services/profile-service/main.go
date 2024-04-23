@@ -20,6 +20,7 @@ import (
 	"os"
 	"profile-service/internal/api"
 	"profile-service/internal/config"
+	"profile-service/internal/models"
 	"strconv"
 )
 
@@ -28,7 +29,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading environment variables from system")
 	}
-	database := config.NewDatabase()
+	database := config.NewDatabase(&models.UserProfile{})
 	defer database.Close()
 
 	// Get the port number from the environment variable.

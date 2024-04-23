@@ -1,0 +1,192 @@
+basePath: /api/v1/profiles
+definitions:
+  dto.UserProfileRequest:
+    properties:
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      profilePictureURL:
+        type: string
+      userID:
+        type: integer
+    required:
+    - dateOfBirth
+    - firstName
+    - lastName
+    - userID
+    type: object
+  dto.UserProfileResponse:
+    properties:
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      profilePictureURL:
+        type: string
+      userID:
+        type: integer
+    type: object
+  dto.UserProfileUpdate:
+    properties:
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      profilePictureURL:
+        type: string
+    type: object
+  pkg.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8084
+info:
+  contact:
+    email: takbir.jcd@gmail.com
+    name: Mohammad Mizan
+    url: http://swagger.io/support
+  description: This API serves as an interface to interact with the My Bus Service
+    platform, providing endpoints for managing bus routes, bookings, and user interactions.
+  license:
+    name: Apache License Version 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: My Profile Service API
+  version: "1.0"
+paths:
+  /{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the user profile for a specified user ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile fetched successfully
+          schema:
+            $ref: '#/definitions/dto.UserProfileResponse'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Profile not found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get user profile
+      tags:
+      - profile
+  /profiles:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user profile with the provided details.
+      parameters:
+      - description: Create Profile Request
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Profile created successfully
+          schema:
+            $ref: '#/definitions/dto.UserProfileResponse'
+        "400":
+          description: Invalid profile data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Create user profile
+      tags:
+      - profile
+  /profiles/{userID}:
+    delete:
+      description: Deletes the profile of the specified user ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Profile deleted successfully
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Delete user profile
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      description: Updates the profile details for a given user ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Update Profile Request
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserProfileUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            $ref: '#/definitions/dto.UserProfileResponse'
+        "400":
+          description: Invalid data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Update user profile
+      tags:
+      - profile
+swagger: "2.0"

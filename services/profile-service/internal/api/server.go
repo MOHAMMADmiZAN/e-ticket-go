@@ -1,10 +1,13 @@
 package api
 
 import (
-	//_ "profile-service/docs" // Required for Swagger docs
+	_ "profile-service/docs" // Required for Swagger docs
 
+	"profile-service/internal/api/handler"
 	"profile-service/internal/api/middleware"
 	"profile-service/internal/config"
+	"profile-service/internal/repository"
+	"profile-service/internal/services"
 
 	"context"
 	"errors"
@@ -43,10 +46,16 @@ func NewServer(databaseClient *config.Database) *Server {
 func (s *Server) routes() {
 
 	// API Versioning
-	//_ := s.Router.Group("/api/v1/auth")
+	v1 := s.Router.Group("/api/v1")
 
 	// Health check route
 	s.setupHealthCheckRoute()
+
+	// Define handlers
+	p := handler.NewProfileHandler(services.NewUserProfileService(repository.NewUserProfileRepository(s.DB.Conn)))
+
+	// Profile routes
+	s.setupProfileRoutes(v1, p)
 
 	// Catch-all route for handling unmatched routes (404 Not Found)
 	s.setupNoRouteHandler()
@@ -56,6 +65,21 @@ func (s *Server) setupHealthCheckRoute() {
 	s.Router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "Profile services is running"})
 	})
+}
+
+func (s *Server) setupProfileRoutes(v1 *gin.RouterGroup, p *handler.ProfileHandler) {
+	// Create user profile
+	v1.POST("/profiles/create", p.CreateProfile)
+
+	// Get user profile
+	v1.GET("/profiles/:userID", p.GetProfile)
+
+	// Update user profile
+	v1.PUT("/profiles/:userID", p.UpdateProfile)
+
+	// Delete user profile
+	v1.DELETE("/profiles/:userID", p.DeleteProfile)
+
 }
 
 func (s *Server) setupNoRouteHandler() {
