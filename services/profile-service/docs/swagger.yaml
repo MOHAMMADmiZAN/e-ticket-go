@@ -68,6 +68,30 @@ info:
   version: "1.0"
 paths:
   /{userID}:
+    delete:
+      description: Deletes the profile of the specified user ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Profile deleted successfully
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Delete user profile
+      tags:
+      - profile
     get:
       consumes:
       - application/json
@@ -98,61 +122,6 @@ paths:
           schema:
             $ref: '#/definitions/pkg.APIResponse'
       summary: Get user profile
-      tags:
-      - profile
-  /profiles:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new user profile with the provided details.
-      parameters:
-      - description: Create Profile Request
-        in: body
-        name: profile
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UserProfileRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Profile created successfully
-          schema:
-            $ref: '#/definitions/dto.UserProfileResponse'
-        "400":
-          description: Invalid profile data
-          schema:
-            $ref: '#/definitions/pkg.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/pkg.APIResponse'
-      summary: Create user profile
-      tags:
-      - profile
-  /profiles/{userID}:
-    delete:
-      description: Deletes the profile of the specified user ID.
-      parameters:
-      - description: User ID
-        in: path
-        name: userID
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: Profile deleted successfully
-        "400":
-          description: Invalid user ID
-          schema:
-            $ref: '#/definitions/pkg.APIResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/pkg.APIResponse'
-      summary: Delete user profile
       tags:
       - profile
     put:
@@ -187,6 +156,36 @@ paths:
           schema:
             $ref: '#/definitions/pkg.APIResponse'
       summary: Update user profile
+      tags:
+      - profile
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user profile with the provided details.
+      parameters:
+      - description: Create Profile Request
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Profile created successfully
+          schema:
+            $ref: '#/definitions/dto.UserProfileResponse'
+        "400":
+          description: Invalid profile data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Create user profile
       tags:
       - profile
 swagger: "2.0"

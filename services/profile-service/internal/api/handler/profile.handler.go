@@ -21,7 +21,7 @@ func NewProfileHandler(profileService services.IUserProfileService) *ProfileHand
 	}
 }
 
-// CreateProfile handles POST /profiles
+// CreateProfile handles POST /create
 // @Summary Create user profile
 // @Description Creates a new user profile with the provided details.
 // @Tags profile
@@ -31,7 +31,7 @@ func NewProfileHandler(profileService services.IUserProfileService) *ProfileHand
 // @Success 201 {object} dto.UserProfileResponse "Profile created successfully"
 // @Failure 400 {object} pkg.APIResponse "Invalid profile data"
 // @Failure 500 {object} pkg.APIResponse "Internal server error"
-// @Router /profiles [post]
+// @Router /create [post]
 func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 	var req dto.UserProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -76,7 +76,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	pkg.RespondWithSuccess(c, http.StatusOK, profile, "Profile fetched successfully")
 }
 
-// UpdateProfile handles PUT /profiles/{userID}
+// UpdateProfile handles PUT /{userID}
 // @Summary Update user profile
 // @Description Updates the profile details for a given user ID.
 // @Tags profile
@@ -87,7 +87,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 // @Success 200 {object} dto.UserProfileResponse "Profile updated successfully"
 // @Failure 400 {object} pkg.APIResponse "Invalid data"
 // @Failure 500 {object} pkg.APIResponse "Internal server error"
-// @Router /profiles/{userID} [put]
+// @Router /{userID} [put]
 func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
@@ -110,7 +110,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	pkg.RespondWithSuccess(c, http.StatusOK, profile, "Profile updated successfully")
 }
 
-// DeleteProfile handles DELETE /profiles/{userID}
+// DeleteProfile handles DELETE /{userID}
 // @Summary Delete user profile
 // @Description Deletes the profile of the specified user ID.
 // @Tags profile
@@ -119,7 +119,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 // @Success 204 "Profile deleted successfully"
 // @Failure 400 {object} pkg.APIResponse "Invalid user ID"
 // @Failure 500 {object} pkg.APIResponse "Internal server error"
-// @Router /profiles/{userID} [delete]
+// @Router /{userID} [delete]
 func (h *ProfileHandler) DeleteProfile(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
 	if err != nil {
