@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "MOHAMMAD IZANAMI RAHMAN",
+            "name": "MOHAMMAD MIZAN",
             "email": "takbir.jcd@gmail.com"
         },
         "license": {
