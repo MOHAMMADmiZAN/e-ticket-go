@@ -1,0 +1,334 @@
+definitions:
+  dto.CreateNotificationRequest:
+    properties:
+      acknowledged:
+        type: boolean
+      channel:
+        type: string
+      content:
+        type: string
+      sendDate:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      userID:
+        type: integer
+    required:
+    - channel
+    - content
+    - sendDate
+    - status
+    - type
+    - userID
+    type: object
+  dto.NotificationResponse:
+    properties:
+      acknowledged:
+        type: boolean
+      channel:
+        type: string
+      content:
+        type: string
+      id:
+        type: integer
+      sendDate:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      userID:
+        type: integer
+    type: object
+  dto.UserNotificationPreferencesRequest:
+    properties:
+      email:
+        type: string
+      phoneNumber:
+        type: string
+      prefersEmail:
+        type: boolean
+      prefersSMS:
+        type: boolean
+    type: object
+  dto.UserNotificationPreferencesResponse:
+    properties:
+      email:
+        type: string
+      phoneNumber:
+        type: string
+      prefersEmail:
+        type: boolean
+      prefersSMS:
+        type: boolean
+      userID:
+        type: integer
+    type: object
+  dto.UserNotificationPreferencesUpdate:
+    properties:
+      email:
+        type: string
+      phoneNumber:
+        type: string
+      prefersEmail:
+        type: boolean
+      prefersSMS:
+        type: boolean
+    type: object
+  pkg.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+info:
+  contact:
+    email: takbir.jcd@gmail.com
+    name: MOHAMMAD MIZAN
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  /:
+    get:
+      description: Retrieves a list of notifications, optionally filtered by user
+        ID.
+      parameters:
+      - description: User ID
+        in: query
+        name: userID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notifications fetched successfully
+          schema:
+            items:
+              $ref: '#/definitions/dto.NotificationResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: List notifications
+      tags:
+      - notifications
+    post:
+      consumes:
+      - application/json
+      description: Creates a new notification based on the provided details.
+      parameters:
+      - description: Create Notification Request
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Notification created successfully
+          schema:
+            $ref: '#/definitions/dto.NotificationResponse'
+        "400":
+          description: Invalid notification data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Create notification
+      tags:
+      - notifications
+  /{id}:
+    delete:
+      description: Deletes a specific notification by ID.
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Notification deleted successfully
+        "400":
+          description: Invalid notification ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Notification not found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Delete notification
+      tags:
+      - notifications
+    get:
+      description: Retrieves a specific notification by ID.
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification fetched successfully
+          schema:
+            $ref: '#/definitions/dto.NotificationResponse'
+        "400":
+          description: Invalid notification ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Notification not found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get notification
+      tags:
+      - notifications
+  /users/{userID}/preferences:
+    delete:
+      description: Deletes notification preferences for a specific user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Preferences deleted successfully
+        "404":
+          description: Preferences not found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Delete user notification preferences
+      tags:
+      - User Preferences
+    get:
+      description: Retrieves notification preferences for a specific user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Preferences fetched successfully
+          schema:
+            $ref: '#/definitions/dto.UserNotificationPreferencesResponse'
+        "404":
+          description: Preferences not found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get user notification preferences
+      tags:
+      - User Preferences
+    post:
+      consumes:
+      - application/json
+      description: Creates notification preferences for a specific user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Create Notification Preferences Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserNotificationPreferencesRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Preferences created successfully
+          schema:
+            $ref: '#/definitions/dto.UserNotificationPreferencesResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Create user notification preferences
+      tags:
+      - User Preferences
+    put:
+      consumes:
+      - application/json
+      description: Updates notification preferences for a specific user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Update Notification Preferences Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserNotificationPreferencesUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Preferences updated successfully
+          schema:
+            $ref: '#/definitions/dto.UserNotificationPreferencesResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "404":
+          description: Preferences not found
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Update user notification preferences
+      tags:
+      - User Preferences
+swagger: "2.0"

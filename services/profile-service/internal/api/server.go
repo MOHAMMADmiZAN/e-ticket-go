@@ -46,7 +46,7 @@ func NewServer(databaseClient *config.Database) *Server {
 func (s *Server) routes() {
 
 	// API Versioning
-	v1 := s.Router.Group("/api/v1")
+	v1 := s.Router.Group("/api/v1/profiles")
 
 	// Health check route
 	s.setupHealthCheckRoute()
@@ -69,16 +69,16 @@ func (s *Server) setupHealthCheckRoute() {
 
 func (s *Server) setupProfileRoutes(v1 *gin.RouterGroup, p *handler.ProfileHandler) {
 	// Create user profile
-	v1.POST("/profiles/create", p.CreateProfile)
+	v1.POST("/create", p.CreateProfile)
 
 	// Get user profile
-	v1.GET("/profiles/:userID", p.GetProfile)
+	v1.GET("/:userID", p.GetProfile)
 
 	// Update user profile
-	v1.PUT("/profiles/:userID", p.UpdateProfile)
+	v1.PUT("/:userID", p.UpdateProfile)
 
 	// Delete user profile
-	v1.DELETE("/profiles/:userID", p.DeleteProfile)
+	v1.DELETE("/:userID", p.DeleteProfile)
 
 }
 

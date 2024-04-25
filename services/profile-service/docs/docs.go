@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/profiles": {
+        "/create": {
             "post": {
                 "description": "Creates a new user profile with the provided details.",
                 "consumes": [
@@ -70,7 +70,55 @@ const docTemplate = `{
                 }
             }
         },
-        "/profiles/{userID}": {
+        "/{userID}": {
+            "get": {
+                "description": "Retrieves the user profile for a specified user ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Get user profile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profile fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Updates the profile details for a given user ID.",
                 "consumes": [
@@ -146,56 +194,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid user ID",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.APIResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/{userID}": {
-            "get": {
-                "description": "Retrieves the user profile for a specified user ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Get user profile",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "userID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Profile fetched successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid user ID",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.APIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Profile not found",
                         "schema": {
                             "$ref": "#/definitions/pkg.APIResponse"
                         }

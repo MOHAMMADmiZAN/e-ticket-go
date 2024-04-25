@@ -1,17 +1,3 @@
-// @title           My Bus Service API
-// @version         1.0
-// @description     This API serves as an interface to interact with the My Bus Service platform, providing endpoints for managing bus routes, bookings, and user interactions.
-// @termsOfService  http://swagger.io/terms/
-
-// @contact.name    Mohammad Mizan
-// @contact.url     http://swagger.io/support
-// @contact.email   takbir.jcd@gmail.com
-
-// @license.name    Apache License Version 2.0
-// @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host            localhost:8086
-// @BasePath        /api/v1/notification
 package main
 
 import (
@@ -19,16 +5,21 @@ import (
 	"log"
 	"notification-service/internal/api"
 	"notification-service/internal/config"
+	"notification-service/internal/models"
 	"os"
 	"strconv"
 )
 
+// @contact.name  MOHAMMAD MIZAN
+// @contact.email  takbir.jcd@gmail.com
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
 	// Load environment variables from .env file if present
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading environment variables from system")
 	}
-	database := config.NewDatabase()
+	database := config.NewDatabase(&models.Notification{}, &models.UserNotificationPreferences{})
 	defer database.Close()
 
 	// Get the port number from the environment variable.

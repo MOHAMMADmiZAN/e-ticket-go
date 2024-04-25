@@ -75,6 +75,7 @@ services:
     restart: on-failure
     volumes:
       - ./services/bus-service:/app
+
   auth-service:
     build:
       context: ./services/auth-service
@@ -95,6 +96,7 @@ services:
     restart: on-failure
     volumes:
       - ./services/auth-service:/app
+
   profile-service:
     build:
       context: ./services/profile-service

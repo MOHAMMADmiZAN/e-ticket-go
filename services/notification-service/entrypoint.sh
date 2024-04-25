@@ -6,5 +6,5 @@ if [ "$ENV" = "dev" ]; then
   exec air
 else
   # Run the compiled application in production
-  exec ./booking-service
+  exec ./notification-service
 fi
