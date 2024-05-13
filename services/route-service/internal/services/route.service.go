@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"route-service/internal/api/dto"
 	"route-service/internal/models"
 	"route-service/internal/repository"
@@ -11,13 +12,15 @@ import (
 
 // RouteService provides methods to work with the routes' repository.
 type RouteService struct {
-	repo *repository.RouteRepository
+	repo        *repository.RouteRepository
+	restyClient *resty.Client
 }
 
 // NewRouteService creates a new instance of RouteService.
 func NewRouteService(repo *repository.RouteRepository) *RouteService {
 	return &RouteService{
-		repo: repo,
+		repo:        repo,
+		restyClient: resty.New(),
 	}
 }
 
@@ -81,29 +84,12 @@ func (s *RouteService) DeleteRoute(ctx context.Context, id uint) error {
 
 func MapRouteModelToRouteResponse(route *models.Route) *dto.RouteResponse {
 	stopsResponse := make([]dto.StopResponse, 0, len(route.Stops))
-
-	// Assuming Schedules are directly related to the Route and not nested under Stops in your models.
-	// We'll need to filter these Schedules to match them with their respective Stops.
 	for _, stop := range route.Stops {
 		// Filter schedules for this specific stop
-		filteredSchedules := filterSchedulesForStop(route.Schedules, stop.ID)
-
-		schedulesResponse := make([]dto.ScheduleResponse, 0, len(filteredSchedules))
-		for _, schedule := range filteredSchedules {
-			schedulesResponse = append(schedulesResponse, dto.ScheduleResponse{
-				ScheduleID:    schedule.ID,
-				ArrivalTime:   schedule.ArrivalTime,
-				DepartureTime: schedule.DepartureTime,
-				CreatedAt:     schedule.CreatedAt,
-				UpdatedAt:     schedule.UpdatedAt,
-			})
-		}
-
 		stopsResponse = append(stopsResponse, dto.StopResponse{
 			StopID:    stop.ID,
 			Name:      stop.Name,
 			Sequence:  stop.Sequence,
-			Schedules: schedulesResponse,
 			CreatedAt: stop.CreatedAt,
 			UpdatedAt: stop.UpdatedAt,
 		})
@@ -120,16 +106,4 @@ func MapRouteModelToRouteResponse(route *models.Route) *dto.RouteResponse {
 		CreatedAt:     pkg.ConvertTime(route.CreatedAt),
 		UpdatedAt:     pkg.ConvertTime(route.UpdatedAt),
 	}
-}
-
-// filterSchedulesForStop takes a slice of all Schedules related to the Route and a StopID,
-// and returns a filtered slice of Schedules that belong to the Stop.
-func filterSchedulesForStop(allSchedules []models.Schedule, stopID uint) []models.Schedule {
-	filtered := make([]models.Schedule, 0)
-	for _, schedule := range allSchedules {
-		if schedule.StopID == stopID {
-			filtered = append(filtered, schedule)
-		}
-	}
-	return filtered
 }

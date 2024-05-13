@@ -67,43 +67,11 @@ func (r *scheduleRepository) toScheduleResponse(schedule *models.Schedule) *dto.
 	if schedule == nil {
 		return nil
 	}
-	if schedule.Stop.ID == 0 || schedule.Route.ID == 0 {
-		// Load the Stop and Route explicitly if not preloaded
-		err := r.db.Model(schedule).Association("Stop").Find(&schedule.Stop)
-		if err != nil {
-			return nil
-		}
-		err = r.db.Model(schedule).Association("Route").Find(&schedule.Route)
-		if err != nil {
-			return nil
-		}
-	}
 	return &dto.ScheduleResponse{
 		ScheduleID:    schedule.ID,
 		ArrivalTime:   schedule.ArrivalTime,
 		DepartureTime: schedule.DepartureTime,
 		CreatedAt:     schedule.CreatedAt,
 		UpdatedAt:     schedule.UpdatedAt,
-	}
-}
-
-func (r *scheduleRepository) toRouteInfoDTO(route *models.Route) dto.RouteInfo {
-	// Convert the models.Route to dto.RouteInfo. Please add the necessary fields.
-	return dto.RouteInfo{
-		RouteID:   route.ID,
-		Name:      route.Name,
-		CreatedAt: route.CreatedAt,
-		UpdatedAt: route.UpdatedAt,
-	}
-}
-
-func (r *scheduleRepository) toStopResponseDTO(stop *models.Stop) dto.StopResponse {
-	// Convert the models.Stop to dto.StopResponse. Please add the necessary fields.
-	return dto.StopResponse{
-		StopID:    stop.ID,
-		Name:      stop.Name,
-		Sequence:  stop.Sequence,
-		CreatedAt: stop.CreatedAt,
-		UpdatedAt: stop.UpdatedAt,
 	}
 }
