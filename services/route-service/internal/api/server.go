@@ -2,15 +2,12 @@ package api
 
 import (
 	"context"
+	_ "route-service/docs" // Required for Swagger docs
 	"errors"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	_ "route-service/docs" // Required for Swagger docs
 	"route-service/internal/api/handler"
 	"route-service/internal/api/middleware"
 	"route-service/internal/config"
@@ -18,6 +15,10 @@ import (
 	"route-service/internal/services"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Server holds the dependencies for a HTTP server.
