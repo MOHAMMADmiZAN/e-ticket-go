@@ -40,8 +40,6 @@ services:
         - ENV=${ENV}  # Takes the environment variable from the .env file or shell environment
     ports:
       - "8081:8081"  # Expose the port for the route-service to the host
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${ROUTE_POSTGRES_DB}
     env_file:
       - ./services/route-service/.env  # Use an environment file for configuration
     depends_on:
@@ -61,8 +59,6 @@ services:
         - ENV=${ENV}
     ports:
       - "8082:8082"
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${BUS_POSTGRES_DB}
     env_file:
       - ./services/bus-service/.env
     depends_on:
@@ -82,8 +78,6 @@ services:
         - ENV=${ENV}
     ports:
       - "8083:8083"
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${AUTH_POSTGRES_DB}
     env_file:
       - ./services/auth-service/.env
     depends_on:
@@ -103,8 +97,6 @@ services:
         - ENV=${ENV}
     ports:
       - "8084:8084"
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${PROFILE_POSTGRES_DB}
     env_file:
       - ./services/profile-service/.env
     depends_on:
@@ -124,8 +116,6 @@ services:
         - ENV=${ENV}
     ports:
       - "8085:8085"
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${BOOKING_POSTGRES_DB}
     env_file:
       - ./services/booking-service/.env
     depends_on:
@@ -145,8 +135,6 @@ services:
         - ENV=${ENV}
     ports:
       - "8086:8086"
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${NOTIFICATION_POSTGRES_DB}
     env_file:
       - ./services/notification-service/.env
     depends_on:

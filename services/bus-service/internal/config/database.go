@@ -82,10 +82,22 @@ func createDatabase(dsn string) {
 			log.Fatalf("Could not close system database connection: %v", err)
 		}
 	}(systemDB)
-
-	_, err = systemDB.Exec(fmt.Sprintf("CREATE DATABASE %s", pq.QuoteIdentifier(dbName)))
-	if err != nil && !strings.Contains(err.Error(), "already exists") {
-		log.Fatalf("Could not create database %s: %v", dbName, err)
+	// Check if the database exists using a proper SQL query for PostgreSQL
+	var exists bool
+	err = systemDB.QueryRow("SELECT EXISTS(SELECT FROM pg_database WHERE datname = $1)", dbName).Scan(&exists)
+	if err != nil {
+		log.Fatalf("Failed to check if database exists: %v", err)
+	}
+	// Only create the database if it does not exist
+	if !exists {
+		// Proper SQL execution with error handling
+		_, err = systemDB.Exec(fmt.Sprintf("CREATE DATABASE %s", pq.QuoteIdentifier(dbName)))
+		if err != nil {
+			log.Fatalf("Could not create database %s: %v", dbName, err)
+		}
+		log.Printf("Database %s created successfully", dbName)
+	} else {
+		log.Printf("Database %s already exists, no need to create.", dbName)
 	}
 }
 

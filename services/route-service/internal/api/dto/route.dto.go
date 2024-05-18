@@ -32,6 +32,7 @@ type RouteResponse struct {
 	StartLocation string         `json:"startLocation"`
 	EndLocation   string         `json:"endLocation"`
 	Stops         []StopResponse `json:"stops"` // Nested Stops within RouteResponse
+	Buses         []BusResponse  `json:"buses"` // Nested Buses within RouteResponse
 	CreatedAt     string         `json:"createdAt"`
 	UpdatedAt     string         `json:"updatedAt"`
 }
@@ -98,4 +99,14 @@ func RouteModelToRouteInfo(route *models.Route) RouteInfo {
 		CreatedAt:       route.CreatedAt,
 		UpdatedAt:       route.UpdatedAt,
 	}
+}
+
+type BusResponse struct {
+	ID              uint      `json:"id"`
+	BusCode         string    `json:"busCode"`
+	Capacity        int       `json:"capacity"`
+	LicensePlate    string    `json:"licensePlate"`
+	Status          string    `json:"status"`
+	LastServiceDate time.Time `json:"lastServiceDate"`
+	NextServiceDate time.Time `json:"nextServiceDate"`
 }

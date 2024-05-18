@@ -38,14 +38,12 @@ func (a *AddScheduleRequest) Validate() error {
 	if a.ArrivalTime.After(a.DepartureTime) {
 		return errors.New("arrival time must be earlier than departure time")
 	}
-
 	return nil // No error means the request is valid.
 }
 
 // ToModel converts AddScheduleRequest to the Schedule models.
 func (a *AddScheduleRequest) ToModel() *models.Schedule {
 	return &models.Schedule{
-		RouteID:       a.RouteID,
 		StopID:        a.StopID,
 		ArrivalTime:   a.ArrivalTime,
 		DepartureTime: a.DepartureTime,
@@ -78,10 +76,8 @@ func (u *UpdateScheduleRequest) Validate() error {
 }
 
 // ToModel converts UpdateScheduleRequest to the Schedule models.
-// This would be used when an existing Schedule is being updated, hence no ID field is needed.
 func (u *UpdateScheduleRequest) ToModel() *models.Schedule {
 	return &models.Schedule{
-		RouteID:       u.RouteID,
 		StopID:        u.StopID,
 		ArrivalTime:   u.ArrivalTime,
 		DepartureTime: u.DepartureTime,

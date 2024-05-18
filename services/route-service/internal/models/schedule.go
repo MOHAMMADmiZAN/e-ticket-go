@@ -9,11 +9,9 @@ import (
 type Schedule struct {
 	gorm.Model
 	ID            uint      `gorm:"primaryKey autoIncrement"`
-	RouteID       uint      `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	StopID        uint      `gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	ArrivalTime   time.Time `gorm:"not null"`
 	DepartureTime time.Time `gorm:"not null"`
-	Route         Route     `gorm:"foreignkey:RouteID"`
 	Stop          Stop      `gorm:"foreignkey:StopID"`
 }
 

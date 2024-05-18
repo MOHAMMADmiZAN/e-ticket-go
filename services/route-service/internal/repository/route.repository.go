@@ -32,9 +32,6 @@ func (r *RouteRepository) GetAll(ctx context.Context) ([]models.Route, error) {
 		Preload("Stops", func(db *gorm.DB) *gorm.DB {
 			return db.Order("stops.sequence ASC") // Order stops by sequence
 		}).
-		Preload("Schedules", func(db *gorm.DB) *gorm.DB {
-			return db.Order("schedules.departure_time ASC") // Order schedules by departure time
-		}).
 		Find(&routes).Error
 	return routes, err
 }
@@ -45,9 +42,6 @@ func (r *RouteRepository) GetByID(ctx context.Context, id uint) (*models.Route, 
 	err := r.db.WithContext(ctx).
 		Preload("Stops", func(db *gorm.DB) *gorm.DB {
 			return db.Order("stops.sequence ASC") // Order stops by sequence
-		}).
-		Preload("Schedules", func(db *gorm.DB) *gorm.DB {
-			return db.Order("schedules.departure_time ASC") // Order schedules by departure time
 		}).
 		Where("id = ?", id).
 		First(&route).Error
