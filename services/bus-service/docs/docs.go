@@ -100,6 +100,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/routes/{routeId}": {
+            "get": {
+                "description": "Retrieve a list of all buses that operate on a specific route.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "buses"
+                ],
+                "summary": "Get all buses by route ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Route ID",
+                        "name": "routeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of all buses",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.BusResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid route ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/status": {
             "get": {
                 "description": "Retrieve a list of all buses with the specified status.",

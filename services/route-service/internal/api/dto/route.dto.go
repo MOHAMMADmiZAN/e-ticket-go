@@ -31,10 +31,10 @@ type RouteResponse struct {
 	Duration      int            `json:"duration"`
 	StartLocation string         `json:"startLocation"`
 	EndLocation   string         `json:"endLocation"`
-	Stops         []StopResponse `json:"stops"` // Nested Stops within RouteResponse
-	Buses         []BusResponse  `json:"buses"` // Nested Buses within RouteResponse
-	CreatedAt     string         `json:"createdAt"`
-	UpdatedAt     string         `json:"updatedAt"`
+	Stops         []StopResponse `json:"stops,omitempty"` // Optional Stops
+	Buses         []BusResponse  `json:"buses,omitempty"` // Optional Buses
+	//CreatedAt string        `json:"createdAt"`
+	//UpdatedAt string        `json:"updatedAt"`
 }
 
 // RouteUpdateRequest represents the request to update a route.
