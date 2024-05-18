@@ -3,11 +3,12 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"route-service/internal/api/dto"
 	"route-service/internal/models"
 	"route-service/internal/repository"
 	"route-service/pkg"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // RouteService provides methods to work with the routes' repository.
@@ -87,11 +88,9 @@ func MapRouteModelToRouteResponse(route *models.Route) *dto.RouteResponse {
 	for _, stop := range route.Stops {
 		// Filter schedules for this specific stop
 		stopsResponse = append(stopsResponse, dto.StopResponse{
-			StopID:    stop.ID,
-			Name:      stop.Name,
-			Sequence:  stop.Sequence,
-			CreatedAt: stop.CreatedAt,
-			UpdatedAt: stop.UpdatedAt,
+			StopID:   stop.ID,
+			Name:     stop.Name,
+			Sequence: stop.Sequence,
 		})
 	}
 
@@ -102,8 +101,8 @@ func MapRouteModelToRouteResponse(route *models.Route) *dto.RouteResponse {
 		Duration:      route.Duration,
 		StartLocation: route.StartLocation,
 		EndLocation:   route.EndLocation,
-		Stops:         stopsResponse,
-		CreatedAt:     pkg.ConvertTime(route.CreatedAt),
-		UpdatedAt:     pkg.ConvertTime(route.UpdatedAt),
+		//Stops:         stopsResponse,
+		CreatedAt: pkg.ConvertTime(route.CreatedAt),
+		UpdatedAt: pkg.ConvertTime(route.UpdatedAt),
 	}
 }

@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
-	_ "route-service/docs" // Required for Swagger docs
 	"errors"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	_ "route-service/docs" // Required for Swagger docs
 	"route-service/internal/api/handler"
 	"route-service/internal/api/middleware"
 	"route-service/internal/config"
@@ -113,7 +113,7 @@ func (s *Server) setupStopHandlers(v1 *gin.RouterGroup, sh handler.StopHandlerIn
 }
 
 func (s *Server) setupScheduleHandlers(v1 *gin.RouterGroup, sch *handler.ScheduleHandler) {
-	schedulesGroup := v1.Group("/:routeId/schedules")
+	schedulesGroup := v1.Group("/stops/:stopId/schedules")
 	{
 		schedulesGroup.POST("/", sch.CreateSchedule)
 		schedulesGroup.GET("/", sch.GetSchedulesByRouteID)

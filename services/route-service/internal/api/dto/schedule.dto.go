@@ -15,7 +15,6 @@ type ScheduleResponse struct {
 }
 
 type AddScheduleRequest struct {
-	RouteID       uint      `json:"route_id" binding:"required"`
 	StopID        uint      `json:"stop_id" binding:"required"`
 	ArrivalTime   time.Time `json:"arrival_time" binding:"required"`
 	DepartureTime time.Time `json:"departure_time" binding:"required"`
@@ -23,9 +22,6 @@ type AddScheduleRequest struct {
 
 // Validate checks the validity of the AddScheduleRequest fields.
 func (a *AddScheduleRequest) Validate() error {
-	if a.RouteID == 0 {
-		return errors.New("route ID is required and must be greater than zero")
-	}
 	if a.StopID == 0 {
 		return errors.New("stop ID is required and must be greater than zero")
 	}
@@ -51,7 +47,6 @@ func (a *AddScheduleRequest) ToModel() *models.Schedule {
 }
 
 type UpdateScheduleRequest struct {
-	RouteID       uint      `json:"route_id" binding:"required"`
 	StopID        uint      `json:"stop_id" binding:"required"`
 	ArrivalTime   time.Time `json:"arrival_time" binding:"required"`
 	DepartureTime time.Time `json:"departure_time" binding:"required"`
@@ -59,9 +54,6 @@ type UpdateScheduleRequest struct {
 
 // Validate checks the validity of the UpdateScheduleRequest fields.
 func (u *UpdateScheduleRequest) Validate() error {
-	if u.RouteID == 0 {
-		return errors.New("route ID is required and must be greater than zero")
-	}
 	if u.StopID == 0 {
 		return errors.New("stop ID is required and must be greater than zero")
 	}

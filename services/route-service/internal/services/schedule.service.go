@@ -46,14 +46,14 @@ func (s *scheduleService) CreateSchedule(ctx context.Context, newSchedule models
 	return resp, nil
 }
 
-func (s *scheduleService) GetScheduleByID(ctx context.Context, scheduleID uint, routeID uint) (*dto.ScheduleResponse, error) {
+func (s *scheduleService) GetScheduleByID(ctx context.Context, scheduleID uint, stopId uint) (*dto.ScheduleResponse, error) {
 	// Check if the schedule is in the cache
 	if cachedSchedule, found := s.cache[scheduleID]; found {
 		// Log cache hit
 		return cachedSchedule, nil
 	}
 	// Log cache miss and fetch from repository
-	resp, err := s.repo.GetScheduleByID(ctx, scheduleID, routeID)
+	resp, err := s.repo.GetScheduleByID(ctx, scheduleID, stopId)
 
 	if err != nil {
 		// Log repository error

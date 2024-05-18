@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"route-service/internal/api/dto"
 	"route-service/internal/services"
 	"route-service/pkg"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ScheduleHandler holds the necessary components for the related handler functions.
@@ -26,20 +27,20 @@ func NewScheduleHandler(scheduleService services.ScheduleService) *ScheduleHandl
 // @Tags Schedules
 // @Accept json
 // @Produce json
-// @Param routeId path int true "Route ID" minimum(1)
+// @Param stopId path int true "Stop ID" minimum(1)
 // @Param addScheduleRequest body dto.AddScheduleRequest true "Schedule information"
 // @Success 201 {object} dto.ScheduleResponse "Created schedule details"
 // @Failure 400 {object} pkg.ErrorMessage "Invalid route ID, request format, or validation error"
 // @Failure 404 {object} pkg.ErrorMessage "Route not found"
 // @Failure 500 {object} pkg.ErrorMessage "Internal server error"
-// @Router /{routeId}/schedules [post]
+// @Router stops/{stopId}/schedules [post]
 // CreateSchedule handles POST requests to create a new schedule.
 func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 	// Parse the route ID from the URL parameter
-	routeIDParam := c.Param("routeId")
-	routeID, err := strconv.ParseUint(routeIDParam, 10, 32) // Convert string to uint
+	stopIdPrams := c.Param("stopId")
+	stopId, err := strconv.ParseUint(stopIdPrams, 10, 32) // Convert string to uint
 	if err != nil {
-		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Invalid route ID"))
+		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Invalid Stop ID"))
 		return
 	}
 	var req dto.AddScheduleRequest
@@ -56,10 +57,12 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse(err.Error()))
 		return
 	}
-	if uint(routeID) != req.RouteID {
-		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Route ID in URL does not match route ID in request"))
+
+	if uint(stopId) != req.StopID {
+		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Invalid stop ID"))
 		return
 	}
+
 	// Convert DTO to Model and validate the request
 	newSchedule := req.ToModel()
 
@@ -77,19 +80,19 @@ func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 // @Tags Schedules
 // @Accept json
 // @Produce json
-// @Param routeId path int true "Route ID" minimum(1)
+// @Param stopId path int true "Stop ID" minimum(1)
 // @Param id path int true "Schedule ID" minimum(1)
 // @Success 200 {object} dto.ScheduleResponse "Schedule details"
 // @Failure 400 {object} pkg.ErrorMessage "Invalid schedule ID"
 // @Failure 404 {object} pkg.ErrorMessage "Schedule not found"
 // @Failure 500 {object} pkg.ErrorMessage "Internal server error"
-// @Router /{routeId}/schedules/{id} [get]
+// @Router /stops/{stopId}/schedules/{id} [get]
 // GetScheduleByID handles GET requests to retrieve a schedule by its ID.
 func (h *ScheduleHandler) GetScheduleByID(c *gin.Context) {
 	scheduleID, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	routeId, err1 := strconv.ParseUint(c.Param("routeId"), 10, 32)
+	stopId, err1 := strconv.ParseUint(c.Param("stopId"), 10, 32)
 	if err1 != nil {
-		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Invalid route ID"))
+		c.JSON(http.StatusBadRequest, pkg.NewErrorResponse("Invalid Stop ID"))
 		return
 
 	}
@@ -98,7 +101,7 @@ func (h *ScheduleHandler) GetScheduleByID(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.scheduleService.GetScheduleByID(c.Request.Context(), uint(scheduleID), uint(routeId))
+	resp, err := h.scheduleService.GetScheduleByID(c.Request.Context(), uint(scheduleID), uint(stopId))
 	if err != nil {
 		c.JSON(http.StatusNotFound, pkg.NewErrorResponse(err.Error()))
 		return
