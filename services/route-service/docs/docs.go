@@ -100,6 +100,123 @@ const docTemplate = `{
                 }
             }
         },
+        "/stops/{stopId}/schedules": {
+            "post": {
+                "description": "Create a new schedule for a specific route.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Schedules"
+                ],
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Stop ID",
+                        "name": "stopId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Schedule information",
+                        "name": "addScheduleRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created schedule details",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid route ID, request format, or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "404": {
+                        "description": "Route not found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    }
+                }
+            }
+        },
+        "/stops/{stopId}/schedules/{id}": {
+            "get": {
+                "description": "Retrieve a schedule by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Schedules"
+                ],
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Stop ID",
+                        "name": "stopId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule details",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid schedule ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    }
+                }
+            }
+        },
         "/{routeId}": {
             "get": {
                 "description": "Retrieve a route by its unique ID",
@@ -292,122 +409,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Create a new schedule for a specific route.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "parameters": [
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Route ID",
-                        "name": "routeId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Schedule information",
-                        "name": "addScheduleRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddScheduleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created schedule details",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ScheduleResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid route ID, request format, or validation error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "404": {
-                        "description": "Route not found",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    }
-                }
             }
         },
         "/{routeId}/schedules/{id}": {
-            "get": {
-                "description": "Retrieve a schedule by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "parameters": [
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Route ID",
-                        "name": "routeId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Schedule ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Schedule details",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ScheduleResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid schedule ID",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "404": {
-                        "description": "Schedule not found",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    }
-                }
-            },
             "put": {
                 "description": "Update details of a schedule by its ID.",
                 "consumes": [
@@ -820,7 +824,6 @@ const docTemplate = `{
             "required": [
                 "arrival_time",
                 "departure_time",
-                "route_id",
                 "stop_id"
             ],
             "properties": {
@@ -829,9 +832,6 @@ const docTemplate = `{
                 },
                 "departure_time": {
                     "type": "string"
-                },
-                "route_id": {
-                    "type": "integer"
                 },
                 "stop_id": {
                     "type": "integer"
@@ -853,20 +853,40 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.BusResponse": {
+            "type": "object",
+            "properties": {
+                "busCode": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastServiceDate": {
+                    "type": "string"
+                },
+                "licensePlate": {
+                    "type": "string"
+                },
+                "nextServiceDate": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.RouteCreateRequest": {
             "type": "object",
             "required": [
-                "duration",
                 "endLocation",
                 "name",
-                "startLocation",
-                "startTime"
+                "startLocation"
             ],
             "properties": {
-                "duration": {
-                    "description": "Ensure duration is greater than 0",
-                    "type": "integer"
-                },
                 "endLocation": {
                     "type": "string"
                 },
@@ -874,9 +894,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "startLocation": {
-                    "type": "string"
-                },
-                "startTime": {
                     "type": "string"
                 }
             }
@@ -886,9 +903,6 @@ const docTemplate = `{
             "properties": {
                 "created_at": {
                     "type": "string"
-                },
-                "duration_minutes": {
-                    "type": "integer"
                 },
                 "end_location": {
                     "type": "string"
@@ -902,9 +916,6 @@ const docTemplate = `{
                 "start_location": {
                     "type": "string"
                 },
-                "start_time": {
-                    "type": "string"
-                },
                 "updated_at": {
                     "type": "string"
                 }
@@ -913,11 +924,12 @@ const docTemplate = `{
         "dto.RouteResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "duration": {
-                    "type": "integer"
+                "buses": {
+                    "description": "Optional Buses",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BusResponse"
+                    }
                 },
                 "endLocation": {
                     "type": "string"
@@ -931,27 +943,18 @@ const docTemplate = `{
                 "startLocation": {
                     "type": "string"
                 },
-                "startTime": {
-                    "type": "string"
-                },
                 "stops": {
-                    "description": "Nested Stops within RouteResponse",
+                    "description": "Optional Stops",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.StopResponse"
                     }
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
         "dto.RouteUpdateRequest": {
             "type": "object",
             "properties": {
-                "duration": {
-                    "type": "integer"
-                },
                 "endLocation": {
                     "type": "string"
                 },
@@ -959,9 +962,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "startLocation": {
-                    "type": "string"
-                },
-                "startTime": {
                     "type": "string"
                 }
             }
@@ -1018,7 +1018,6 @@ const docTemplate = `{
             "required": [
                 "arrival_time",
                 "departure_time",
-                "route_id",
                 "stop_id"
             ],
             "properties": {
@@ -1027,9 +1026,6 @@ const docTemplate = `{
                 },
                 "departure_time": {
                     "type": "string"
-                },
-                "route_id": {
-                    "type": "integer"
                 },
                 "stop_id": {
                     "type": "integer"

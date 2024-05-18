@@ -103,8 +103,6 @@ func MapRouteModelToRouteResponse(route *models.Route, s *RouteService, isExPend
 	routeResponse := &dto.RouteResponse{
 		ID:            route.ID,
 		Name:          route.Name,
-		StartTime:     route.StartTime,
-		Duration:      route.Duration,
 		StartLocation: route.StartLocation,
 		EndLocation:   route.EndLocation,
 		// CreatedAt:     pkg.ConvertTime(route.CreatedAt),
@@ -116,6 +114,7 @@ func MapRouteModelToRouteResponse(route *models.Route, s *RouteService, isExPend
 		stopsResponse := make([]dto.StopResponse, len(route.Stops))
 		for i, stop := range route.Stops {
 			stopsResponse[i] = dto.StopResponse{
+				StopID:   stop.ID,
 				Name:     stop.Name,
 				Sequence: stop.Sequence,
 			}

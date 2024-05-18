@@ -16,7 +16,7 @@ type StopResponse struct {
 	StopID    uint               `json:"stop_id"`
 	Name      string             `json:"name"`
 	Sequence  int                `json:"sequence"`
-	Schedules []ScheduleResponse `json:"schedules"` // Nested Schedules within StopResponse
+	Schedules []ScheduleResponse `json:"schedules"`
 	CreatedAt time.Time          `json:"created_at"`
 	UpdatedAt time.Time          `json:"updated_at"`
 }

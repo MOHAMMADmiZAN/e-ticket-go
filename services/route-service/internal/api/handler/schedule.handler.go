@@ -33,8 +33,7 @@ func NewScheduleHandler(scheduleService services.ScheduleService) *ScheduleHandl
 // @Failure 400 {object} pkg.ErrorMessage "Invalid route ID, request format, or validation error"
 // @Failure 404 {object} pkg.ErrorMessage "Route not found"
 // @Failure 500 {object} pkg.ErrorMessage "Internal server error"
-// @Router stops/{stopId}/schedules [post]
-// CreateSchedule handles POST requests to create a new schedule.
+// @Router /stops/{stopId}/schedules [post]
 func (h *ScheduleHandler) CreateSchedule(c *gin.Context) {
 	// Parse the route ID from the URL parameter
 	stopIdPrams := c.Param("stopId")
