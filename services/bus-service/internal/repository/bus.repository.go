@@ -5,8 +5,9 @@ import (
 	"errors"
 	_ "errors"
 	_ "fmt"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type BusRepository struct {
@@ -121,4 +122,11 @@ func (repo *BusRepository) GetBusByCodeOrLicensePlate(busCode, licensePlate stri
 		return nil, result.Error
 	}
 	return &bus, nil
+}
+
+// GetBusesByRouteID retrieves all buses assigned to a specific route.
+func (repo *BusRepository) GetBusesByRouteID(routeID uint) ([]models.Bus, error) {
+	var buses []models.Bus
+	result := repo.DB.Where("route_id = ?", routeID).Find(&buses)
+	return buses, result.Error
 }

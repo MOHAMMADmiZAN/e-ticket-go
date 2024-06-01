@@ -6,12 +6,13 @@ import (
 	"bus-service/internal/repository"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"gorm.io/gorm"
 )
 
 var (
@@ -118,4 +119,9 @@ func (service *BusService) UpdateBusServiceDates(id uint, lastServiceDate, nextS
 		return errors.New("last service date must be before the next service date")
 	}
 	return service.busRepo.UpdateBusServiceDates(id, lastServiceDate, nextServiceDate)
+}
+
+// GetBusesByRoute retrieves all buses by their route ID.
+func (service *BusService) GetBusesByRoute(routeID uint) ([]models.Bus, error) {
+	return service.busRepo.GetBusesByRouteID(routeID)
 }

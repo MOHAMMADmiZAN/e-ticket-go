@@ -6,10 +6,11 @@ import (
 	"bus-service/internal/services"
 	"bus-service/pkg"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type BusHandler struct {
@@ -278,4 +279,38 @@ func (h *BusHandler) UpdateBusServiceDates(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Bus service dates updated successfully"})
+}
+
+// GetBusesByRouteID godoc
+// @Summary Get all buses by route ID
+// @Description Retrieve a list of all buses that operate on a specific route.
+// @Tags buses
+// @Accept  json
+// @Produce  json
+//
+//	@Param routeId path int true "Route ID"
+//
+// @Success 200 {array} dto.BusResponse "List of all buses"
+// @Failure 400 {object} pkg.APIResponse "Bad Request - Invalid route ID"
+//
+//	@Router /routes/{routeId} [get]
+func (h *BusHandler) GetBusesByRouteID(c *gin.Context) {
+	routeID, err := h.parseUintParam(c, "routeId")
+	if err != nil {
+		pkg.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	buses, err := h.busService.GetBusesByRoute(routeID)
+	if err != nil {
+		pkg.RespondWithError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	busesResponse := make([]dto.BusResponse, 0, len(buses))
+	for _, bus := range buses {
+		busesResponse = append(busesResponse, dto.FromModel(bus))
+	}
+
+	pkg.RespondWithSuccess(c, http.StatusOK, busesResponse, "")
 }

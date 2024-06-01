@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
-	"gorm.io/gorm"
 	"route-service/internal/api/dto"
 	"route-service/internal/models"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -164,10 +165,8 @@ func (repo *StopRepository) GetStopBySequenceAndRouteID(ctx context.Context, seq
 // mapStopToResponse maps a models.Stop to a dto.StopResponse.
 func mapStopToResponse(stop models.Stop) dto.StopResponse {
 	return dto.StopResponse{
-		StopID:    stop.ID,
-		Name:      stop.Name,
-		Sequence:  stop.Sequence,
-		CreatedAt: stop.CreatedAt,
-		UpdatedAt: stop.UpdatedAt,
+		StopID:   stop.ID,
+		Name:     stop.Name,
+		Sequence: stop.Sequence,
 	}
 }

@@ -9,15 +9,16 @@ import (
 	"bus-service/internal/services"
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Server holds the dependencies for a HTTP server.
@@ -94,6 +95,7 @@ func (s *Server) setupBusRoutes(v1 *gin.RouterGroup, b *handler.BusHandler) {
 		busGroup.DELETE("/:busID", b.DeleteBus)
 		busGroup.GET("/status", b.GetBusesByStatus)
 		busGroup.PUT("/:busID/service-dates", b.UpdateBusServiceDates)
+		busGroup.GET("/routes/:routeId", b.GetBusesByRouteID)
 	}
 
 }

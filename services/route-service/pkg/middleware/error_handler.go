@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var logger *zap.Logger

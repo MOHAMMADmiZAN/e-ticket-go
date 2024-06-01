@@ -643,6 +643,33 @@ paths:
       summary: Update bus service dates
       tags:
       - buses
+  /routes/{routeId}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all buses that operate on a specific route.
+      parameters:
+      - description: Route ID
+        in: path
+        name: routeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all buses
+          schema:
+            items:
+              $ref: '#/definitions/dto.BusResponse'
+            type: array
+        "400":
+          description: Bad Request - Invalid route ID
+          schema:
+            $ref: '#/definitions/pkg.APIResponse'
+      summary: Get all buses by route ID
+      tags:
+      - buses
   /status:
     get:
       consumes:
