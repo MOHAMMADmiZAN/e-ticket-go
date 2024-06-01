@@ -10,10 +10,10 @@ import (
 
 type ScheduleRepository interface {
 	CreateSchedule(ctx context.Context, schedule *models.Schedule) (*dto.ScheduleResponse, error)
-	GetScheduleByID(ctx context.Context, scheduleID uint, routeID uint) (*dto.ScheduleResponse, error)
-	GetSchedulesByRouteID(ctx context.Context, routeID uint) ([]dto.ScheduleResponse, error)
+	GetScheduleByID(ctx context.Context, scheduleID uint, stopId uint) (*dto.ScheduleResponse, error)
+	GetSchedules(ctx context.Context, stopId uint) ([]dto.ScheduleResponse, error)
 	UpdateSchedule(ctx context.Context, schedule *models.Schedule) (*dto.ScheduleResponse, error)
-	DeleteSchedule(ctx context.Context, scheduleID uint, routeID uint) error
+	DeleteSchedule(ctx context.Context, scheduleID uint, stopId uint) error
 }
 
 type scheduleRepository struct {
@@ -31,7 +31,7 @@ func (r *scheduleRepository) CreateSchedule(ctx context.Context, schedule *model
 	return r.toScheduleResponse(schedule), nil
 }
 
-func (r *scheduleRepository) GetScheduleByID(ctx context.Context, scheduleID, stopId uint) (*dto.ScheduleResponse, error) {
+func (r *scheduleRepository) GetScheduleByID(ctx context.Context, scheduleID uint, stopId uint) (*dto.ScheduleResponse, error) {
 	var schedule models.Schedule
 	if result := r.db.WithContext(ctx).Where("stop_id = ?", stopId).First(&schedule, scheduleID); result.Error != nil {
 		return nil, result.Error
@@ -39,7 +39,7 @@ func (r *scheduleRepository) GetScheduleByID(ctx context.Context, scheduleID, st
 	return r.toScheduleResponse(&schedule), nil
 }
 
-func (r *scheduleRepository) GetSchedulesByRouteID(ctx context.Context, stopId uint) ([]dto.ScheduleResponse, error) {
+func (r *scheduleRepository) GetSchedules(ctx context.Context, stopId uint) ([]dto.ScheduleResponse, error) {
 	var schedules []models.Schedule
 	if result := r.db.WithContext(ctx).Where("stop_id = ?", stopId).Find(&schedules); result.Error != nil {
 		return nil, result.Error
@@ -60,7 +60,7 @@ func (r *scheduleRepository) UpdateSchedule(ctx context.Context, schedule *model
 }
 
 // DeleteSchedule deletes a schedule by its ID and route ID.
-func (r *scheduleRepository) DeleteSchedule(ctx context.Context, scheduleID, stopId uint) error {
+func (r *scheduleRepository) DeleteSchedule(ctx context.Context, scheduleID uint, stopId uint) error {
 	return r.db.WithContext(ctx).Where("stop_id = ?", stopId).Delete(&models.Schedule{}, scheduleID).Error
 }
 
@@ -87,10 +87,8 @@ func (r *scheduleRepository) toScheduleResponse(schedule *models.Schedule) *dto.
 func (r *scheduleRepository) toStopResponseDTO(stop *models.Stop) dto.StopResponse {
 	// Convert the models.Stop to dto.StopResponse. Please add the necessary fields.
 	return dto.StopResponse{
-		StopID:    stop.ID,
-		Name:      stop.Name,
-		Sequence:  stop.Sequence,
-		CreatedAt: stop.CreatedAt,
-		UpdatedAt: stop.UpdatedAt,
+		StopID:   stop.ID,
+		Name:     stop.Name,
+		Sequence: stop.Sequence,
 	}
 }

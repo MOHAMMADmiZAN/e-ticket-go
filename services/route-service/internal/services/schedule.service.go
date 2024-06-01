@@ -11,10 +11,10 @@ import (
 
 type ScheduleService interface {
 	CreateSchedule(ctx context.Context, newSchedule models.Schedule) (*dto.ScheduleResponse, error)
-	GetScheduleByID(ctx context.Context, scheduleID uint, routeID uint) (*dto.ScheduleResponse, error)
-	GetSchedulesByRouteID(ctx context.Context, routeID uint) ([]dto.ScheduleResponse, error)
+	GetScheduleByID(ctx context.Context, scheduleID uint, stopId uint) (*dto.ScheduleResponse, error)
+	GetSchedules(ctx context.Context, stopId uint) ([]dto.ScheduleResponse, error)
 	UpdateSchedule(ctx context.Context, scheduleID uint, updateSchedule models.Schedule) (*dto.ScheduleResponse, error)
-	DeleteSchedule(ctx context.Context, scheduleID uint, routeID uint) error
+	DeleteSchedule(ctx context.Context, scheduleID uint, stopId uint) error
 }
 
 type scheduleService struct {
@@ -67,9 +67,9 @@ func (s *scheduleService) GetScheduleByID(ctx context.Context, scheduleID uint, 
 	return resp, nil
 }
 
-func (s *scheduleService) GetSchedulesByRouteID(ctx context.Context, routeID uint) ([]dto.ScheduleResponse, error) {
+func (s *scheduleService) GetSchedules(ctx context.Context, stopId uint) ([]dto.ScheduleResponse, error) {
 	// This can also be cached if required
-	resp, err := s.repo.GetSchedulesByRouteID(ctx, routeID)
+	resp, err := s.repo.GetSchedules(ctx, stopId)
 	if err != nil {
 		// Log repository error
 		return nil, fmt.Errorf("getting schedules by route ID: %w", err)
@@ -94,8 +94,8 @@ func (s *scheduleService) UpdateSchedule(ctx context.Context, scheduleID uint, u
 	return resp, nil
 }
 
-func (s *scheduleService) DeleteSchedule(ctx context.Context, scheduleID uint, routeID uint) error {
-	err := s.repo.DeleteSchedule(ctx, scheduleID, routeID)
+func (s *scheduleService) DeleteSchedule(ctx context.Context, scheduleID uint, stopId uint) error {
+	err := s.repo.DeleteSchedule(ctx, scheduleID, stopId)
 	if err != nil {
 		// Log repository error
 		return fmt.Errorf("deleting schedule: %w", err)

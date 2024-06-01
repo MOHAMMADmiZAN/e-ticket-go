@@ -1,4 +1,3 @@
-# .air.toml
 # Air configuration file for live reloading Go applications
 
 # Root directory of your project, where the go.mod file is located
@@ -11,7 +10,7 @@ tmp_dir = "tmp"
 poll = true
 # Command to build your application, output the binary to the tmp directory
 bin = "tmp/route-service"
-cmd = "go build -o ./tmp/route-service"
+cmd = "go build -o ./tmp/route-service ./cmd/main.go"
 # Directory where the log file will be stored
 log = "build-errors.log"
 # Directories or glob patterns to include in the watch list

@@ -1,4 +1,4 @@
-basePath: /api/v1/routes
+basePath: /api/v1
 definitions:
   dto.AddScheduleRequest:
     properties:
@@ -113,12 +113,9 @@ definitions:
     type: object
   dto.StopResponse:
     properties:
-      created_at:
-        type: string
       name:
         type: string
       schedules:
-        description: Nested Schedules within StopResponse
         items:
           $ref: '#/definitions/dto.ScheduleResponse'
         type: array
@@ -126,8 +123,6 @@ definitions:
         type: integer
       stop_id:
         type: integer
-      updated_at:
-        type: string
     type: object
   dto.UpdateScheduleRequest:
     properties:
@@ -154,14 +149,13 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8081
 info:
   contact:
     email: takbir.jcd@gmail.com
     name: Mohammad Mizan
     url: http://swagger.io/support
   description: This API serves as an interface to interact with the My Route Service
-    platform, providing endpoints for managing bus routes, bookings, and user interactions.
+    platform, providing endpoints for managing bus routes, Stops, and schedules.
   license:
     name: Apache License Version 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -169,7 +163,7 @@ info:
   title: My Route Service API
   version: "1.0"
 paths:
-  /:
+  /routes:
     get:
       consumes:
       - application/json
@@ -219,7 +213,7 @@ paths:
       summary: Add a new route
       tags:
       - routes
-  /{routeId}:
+  /routes/{routeId}:
     delete:
       consumes:
       - application/json
@@ -313,123 +307,7 @@ paths:
       summary: Update a route
       tags:
       - routes
-  /{routeId}/schedules:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all schedules for a route by its ID.
-      parameters:
-      - description: Route ID
-        in: path
-        minimum: 1
-        name: routeId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of schedules
-          schema:
-            items:
-              $ref: '#/definitions/dto.ScheduleResponse'
-            type: array
-        "400":
-          description: Invalid route ID
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "404":
-          description: Route not found
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      tags:
-      - Schedules
-  /{routeId}/schedules/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a schedule by its ID.
-      parameters:
-      - description: Route ID
-        in: path
-        minimum: 1
-        name: routeId
-        required: true
-        type: integer
-      - description: Schedule ID
-        in: path
-        minimum: 1
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid schedule ID
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "404":
-          description: Schedule not found
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      tags:
-      - Schedules
-    put:
-      consumes:
-      - application/json
-      description: Update details of a schedule by its ID.
-      parameters:
-      - description: Route ID
-        in: path
-        minimum: 1
-        name: routeId
-        required: true
-        type: integer
-      - description: Schedule ID
-        in: path
-        minimum: 1
-        name: id
-        required: true
-        type: integer
-      - description: Updated schedule information
-        in: body
-        name: updateScheduleRequest
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateScheduleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Updated schedule details
-          schema:
-            $ref: '#/definitions/dto.ScheduleResponse'
-        "400":
-          description: Invalid schedule ID or request format
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "404":
-          description: Schedule not found
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/pkg.ErrorMessage'
-      tags:
-      - Schedules
-  /{routeId}/stops:
+  /routes/{routeId}/stops:
     get:
       consumes:
       - application/json
@@ -502,7 +380,7 @@ paths:
             $ref: '#/definitions/pkg.ErrorMessage'
       tags:
       - Stops
-  /{routeId}/stops/{id}:
+  /routes/{routeId}/stops/{id}:
     delete:
       consumes:
       - application/json
@@ -621,7 +499,34 @@ paths:
             $ref: '#/definitions/pkg.ErrorMessage'
       tags:
       - Stops
-  /stops/{stopId}/schedules:
+  /routes/stops/{stopId}/schedules:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all schedules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of schedules
+          schema:
+            items:
+              $ref: '#/definitions/dto.ScheduleResponse'
+            type: array
+        "400":
+          description: Invalid route ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Route not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
     post:
       consumes:
       - application/json
@@ -660,7 +565,43 @@ paths:
             $ref: '#/definitions/pkg.ErrorMessage'
       tags:
       - Schedules
-  /stops/{stopId}/schedules/{id}:
+  /routes/stops/{stopId}/schedules/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a schedule by its ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Schedule ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid schedule ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Schedule not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
     get:
       consumes:
       - application/json
@@ -687,6 +628,50 @@ paths:
             $ref: '#/definitions/dto.ScheduleResponse'
         "400":
           description: Invalid schedule ID
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "404":
+          description: Schedule not found
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.ErrorMessage'
+      tags:
+      - Schedules
+    put:
+      consumes:
+      - application/json
+      description: Update details of a schedule by its ID.
+      parameters:
+      - description: Route ID
+        in: path
+        minimum: 1
+        name: routeId
+        required: true
+        type: integer
+      - description: Schedule ID
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: Updated schedule information
+        in: body
+        name: updateScheduleRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated schedule details
+          schema:
+            $ref: '#/definitions/dto.ScheduleResponse'
+        "400":
+          description: Invalid schedule ID or request format
           schema:
             $ref: '#/definitions/pkg.ErrorMessage'
         "404":

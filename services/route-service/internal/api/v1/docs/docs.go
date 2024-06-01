@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/": {
+        "/routes": {
             "get": {
                 "description": "Get a list of all routes available in the system",
                 "consumes": [
@@ -100,7 +100,48 @@ const docTemplate = `{
                 }
             }
         },
-        "/stops/{stopId}/schedules": {
+        "/routes/stops/{stopId}/schedules": {
+            "get": {
+                "description": "Retrieve all schedules",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Schedules"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of schedules",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ScheduleResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid route ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "404": {
+                        "description": "Route not found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new schedule for a specific route.",
                 "consumes": [
@@ -159,7 +200,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stops/{stopId}/schedules/{id}": {
+        "/routes/stops/{stopId}/schedules/{id}": {
             "get": {
                 "description": "Retrieve a schedule by its ID.",
                 "consumes": [
@@ -215,9 +256,127 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Update details of a schedule by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Schedules"
+                ],
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Route ID",
+                        "name": "routeId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated schedule information",
+                        "name": "updateScheduleRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated schedule details",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid schedule ID or request format",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a schedule by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Schedules"
+                ],
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Route ID",
+                        "name": "routeId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid schedule ID",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.ErrorMessage"
+                        }
+                    }
+                }
             }
         },
-        "/{routeId}": {
+        "/routes/{routeId}": {
             "get": {
                 "description": "Retrieve a route by its unique ID",
                 "consumes": [
@@ -358,180 +517,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/{routeId}/schedules": {
-            "get": {
-                "description": "Retrieve all schedules for a route by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "parameters": [
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Route ID",
-                        "name": "routeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of schedules",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ScheduleResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid route ID",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "404": {
-                        "description": "Route not found",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    }
-                }
-            }
-        },
-        "/{routeId}/schedules/{id}": {
-            "put": {
-                "description": "Update details of a schedule by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "parameters": [
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Route ID",
-                        "name": "routeId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Schedule ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated schedule information",
-                        "name": "updateScheduleRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateScheduleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Updated schedule details",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ScheduleResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid schedule ID or request format",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "404": {
-                        "description": "Schedule not found",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove a schedule by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "parameters": [
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Route ID",
-                        "name": "routeId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Schedule ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Invalid schedule ID",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "404": {
-                        "description": "Schedule not found",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.ErrorMessage"
-                        }
-                    }
-                }
-            }
-        },
-        "/{routeId}/stops": {
+        "/routes/{routeId}/stops": {
             "get": {
                 "description": "Retrieve a list of stops for a given route.",
                 "consumes": [
@@ -641,7 +627,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/{routeId}/stops/{id}": {
+        "/routes/{routeId}/stops/{id}": {
             "get": {
                 "description": "Retrieve details of a stop by its unique ID.",
                 "consumes": [
@@ -989,14 +975,10 @@ const docTemplate = `{
         "dto.StopResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
                 "schedules": {
-                    "description": "Nested Schedules within StopResponse",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.ScheduleResponse"
@@ -1007,9 +989,6 @@ const docTemplate = `{
                 },
                 "stop_id": {
                     "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
                 }
             }
         },
@@ -1057,11 +1036,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8081",
-	BasePath:         "/api/v1/routes",
+	Host:             "",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "My Route Service API",
-	Description:      "This API serves as an interface to interact with the My Route Service platform, providing endpoints for managing bus routes, bookings, and user interactions.",
+	Description:      "This API serves as an interface to interact with the My Route Service platform, providing endpoints for managing bus routes, Stops, and schedules.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
