@@ -41,7 +41,7 @@ func SetupRoutes(router *gin.Engine, db *config.Database) {
 	// Set the Swagger host
 	v1docs.SwaggerInfo.Schemes = []string{"http", "https"}
 	v1docs.SwaggerInfo.Host = swaggerHost
-	swagUrl := ginSwagger.URL("http://" + swaggerHost + "/swagger/v1/doc.json")
+	swagUrl := ginSwagger.URL("/swagger/v1/doc.json")
 
 	// v1 Swagger documentation
 	router.GET("/swagger/v1/*any", func(c *gin.Context) {
